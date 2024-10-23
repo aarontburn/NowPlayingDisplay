@@ -52,7 +52,7 @@ export class Spotify {
             albumName: song.album.name,
             songName: song.name,
             artists: song.artists.map(a => a.name),
-            images: song.album.images ?? [{ url: '' }],
+            images: song.album.images.length === 0 ? [{ url: '' }] : song.album.images,
             songLength: song.duration_ms,
             songPosition: currentTrack.progress_ms
         }

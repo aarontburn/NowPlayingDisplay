@@ -11,7 +11,7 @@ p {
 }
 
 #song-name {
-    font-size: 2em;
+    font-size: 3em;
     margin-bottom: 0.25em;
     font-weight: 600;
 
@@ -19,7 +19,7 @@ p {
 }
 
 #artists {
-    font-size: 1em;
+    font-size: 1.5em;
     font-weight: 300;
 }
 
@@ -32,14 +32,20 @@ p {
 }
 
 #small-album-art {
-    height: 10em;
+    height: 15em;
     margin-right: 1em;
+    position: absolute;
+    left: 3em;
+    bottom: 3em;
 }
 
 #details-container {
+    position: absolute;
+    left: calc(3em + 15em + 1em);
+    bottom: calc(7.5em);
+
+    
     z-index: 1;
     color: whitesmoke;
 
-    display: flex;
-    align-items: center;
 }

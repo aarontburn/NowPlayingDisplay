@@ -30,12 +30,12 @@ const Home = () => {
 		})()
 	}, [spotify])
 
-	
 	return <div id='container'>
 		<img id='album-art' src={currentTrack ? currentTrack.images[0].url : ''}></img>
+		<img id='small-album-art' src={currentTrack ? currentTrack.images[0].url : ''}></img>
+
 		<div id='details-container'>
-			<img id='small-album-art' src={currentTrack ? currentTrack.images[0].url : ''}></img>
-			<div>
+			<div style={{display: 'flex', flexDirection: 'column', justifyContent: 'left'}}>
 				<p id='song-name'>{currentTrack ? currentTrack.songName : ''}</p>
 				<p id='artists'>{currentTrack ? currentTrack.artists.join(', ') : ''}</p>
 			</div>
