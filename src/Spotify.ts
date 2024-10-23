@@ -33,6 +33,16 @@ export class Spotify {
 
 
     public async getCurrentTrack(): Promise<CurrentSong> {
+        if (!this.sdk) {
+            return {
+                albumName: '',
+                songName: '',
+                artists: [],
+                images: [{ url: '' }],
+                songLength: -1,
+                songPosition: -1
+            }
+        }
 
         const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack();
 
@@ -42,7 +52,7 @@ export class Spotify {
             albumName: song.album.name,
             songName: song.name,
             artists: song.artists.map(a => a.name),
-            images: song.album.images,
+            images: song.album.images ?? [{ url: '' }],
             songLength: song.duration_ms,
             songPosition: currentTrack.progress_ms
         }
@@ -50,6 +60,10 @@ export class Spotify {
     }
 
     public async togglePlay() {
+        if (this.sdk) {
+            return;
+        }
+
         const currentState = await this.sdk.player.getPlaybackState();
         if (currentState.is_playing) {
             this.pause();
@@ -59,7 +73,9 @@ export class Spotify {
     }
 
     public async play() {
-        this.sdk.player.startResumePlayback(undefined).catch(err => { })
+        if (this.sdk) {
+            this.sdk.player.startResumePlayback(undefined).catch(err => { })
+        }
     }
 
     public async pause() {
