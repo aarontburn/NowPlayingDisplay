@@ -3,7 +3,7 @@ import { AccessToken, Device, SpotifyApi, Track } from '@spotify/web-api-ts-sdk'
 
 const i: string = 'dd3af8424e834918ae856cf21023fc5b'
 const s: string = 'ee35c5de002743ec807c5c1583e03ff3'
-const re: string = 'http://192.168.0.46:3000/'
+const re: string = 'http://localhost:3000/'
 const SCOPE: string[] = ['user-read-currently-playing', 'user-read-playback-state', 'user-modify-playback-state']
 
 export interface CurrentSong {
