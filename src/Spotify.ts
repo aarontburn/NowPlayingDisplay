@@ -45,6 +45,17 @@ export class Spotify {
         }
 
         const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack();
+        console.log(currentTrack)
+        if (!currentTrack) {
+            return {
+                albumName: '',
+                songName: 'No Song Playing',
+                artists: [],
+                images: [{ url: '' }],
+                songLength: -1,
+                songPosition: -1
+            }
+        }
 
         const song: Track = currentTrack.item as Track;
 
