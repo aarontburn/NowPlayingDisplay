@@ -67,16 +67,24 @@ const Home = () => {
 
 
 		<div id='details-container'>
-			<img
-				id='small-album-art'
-				src={currentTrack.images[0].url}
-				alt='Small album art display.'
-			>
-			</img>
+			<div id='small-album-art'>
+				{
+					currentTrack.images[0].url !== '' &&
+					<img
+						src={currentTrack.images[0].url}
+						alt='Small album art display.'
+						style={{ height: '100%' }}
+					>
+					</img>
+				}
+
+			</div>
+
 
 			<div id='text-container'>
 				<p id='song-name'>{currentTrack.songName}</p>
 				<p id='artists'>{currentTrack.artists.join(', ')}</p>
+				<p id='album-name'>{currentTrack.albumName}</p>
 
 			</div>
 

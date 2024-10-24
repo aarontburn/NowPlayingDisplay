@@ -18,9 +18,9 @@ export interface CurrentSong {
 }
 
 export const defaultNoSong: CurrentSong = {
-    albumName: '',
+    albumName: ' ',
     songName: 'No Song Playing',
-    artists: [],
+    artists: [' '],
     images: [{ url: '' }],
     songLength: -1,
     songPosition: -1
