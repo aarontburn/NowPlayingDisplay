@@ -47,7 +47,7 @@ export class Spotify {
         if (!this.sdk) {
             return { ...defaultNoSong };
         }
-        const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack().catch(err => console.log(err));
+        const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack().catch(err => this.build());
         if (!currentTrack) {
             return { ...defaultNoSong };
         }
