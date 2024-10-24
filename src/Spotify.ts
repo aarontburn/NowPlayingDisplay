@@ -66,7 +66,6 @@ export class Spotify {
 
 
 
-
     }
 
     public async togglePlay() {
