@@ -32,14 +32,16 @@ const Home = () => {
 
 	return <div id='container'>
 		<img id='album-art' src={currentTrack ? currentTrack.images[0].url : ''}></img>
-		<img id='small-album-art' src={currentTrack ? currentTrack.images[0].url : ''}></img>
 
 		<div id='details-container'>
+			<img id='small-album-art' src={currentTrack ? currentTrack.images[0].url : ''}></img>
+
 			<div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'left' }}>
 				<p onClick={() => {
 					document.exitFullscreen().catch(() => { document.getElementById('container').requestFullscreen() })
 				}} id='song-name'>{currentTrack ? currentTrack.songName : ''}</p>
 				<p id='artists'>{currentTrack ? currentTrack.artists.join(', ') : ''}</p>
+
 			</div>
 
 		</div>

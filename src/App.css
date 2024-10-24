@@ -11,7 +11,7 @@ p {
 }
 
 #song-name {
-    font-size: 3rem;
+    font-size: 3em;
     margin-bottom: 0.25em;
     font-weight: 600;
 
@@ -19,7 +19,7 @@ p {
 }
 
 #artists {
-    font-size: 1.5rem;
+    font-size: 1.5em;
     font-weight: 300;
 }
 
@@ -34,17 +34,19 @@ p {
 }
 
 #small-album-art {
-    height: 33rem;
-    margin-right: 1em;
-    position: absolute;
-    left: 3em;
-    bottom: 3em;
+    height: 33vh;
+    margin-right: 3em;
 }
 
 #details-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: left;
+
     position: absolute;
-    left: calc(3rem + 33rem + 2rem);
-    bottom: calc(18.5rem);
+    left: 5em;
+    bottom: 5em;
 
     
     z-index: 1;
