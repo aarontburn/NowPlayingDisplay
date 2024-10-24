@@ -45,8 +45,7 @@ export class Spotify {
                 songPosition: -1
             }
         }
-
-        const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack();
+        const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack().catch(err => console.log(err));
         if (!currentTrack) {
             return {
                 albumName: '',
@@ -69,6 +68,10 @@ export class Spotify {
             songPosition: currentTrack.progress_ms
         }
 
+
+
+
+
     }
 
     public async togglePlay() {
@@ -78,27 +81,24 @@ export class Spotify {
 
         const currentState = await this.sdk.player.getPlaybackState();
         if (currentState.is_playing) {
-            this.pause();
+            await this.pause();
             return;
         }
-        this.play()
+        await this.play()
     }
 
     public async play() {
-        if (this.sdk) {
-            this.sdk.player.startResumePlayback(undefined).catch(_ => { })
+        if (!this.sdk) {
+            return;
         }
+        await this.sdk.player.startResumePlayback(undefined).catch(_ => { });
     }
 
     public async pause() {
         if (!this.sdk) {
             return;
         }
-        this.sdk.player.pausePlayback(undefined).catch(_ => { })
-    }
-
-    public async getCurrentDevice(): Promise<Device> {
-        return (await this.sdk.player.getPlaybackState()).device
+        await this.sdk.player.pausePlayback(undefined).catch(_ => { });
     }
 
     public async setVolume(volumePercent: number) {
@@ -109,21 +109,21 @@ export class Spotify {
             volumePercent = 100;
         }
 
-        this.sdk.player.setPlaybackVolume(volumePercent);
+        await this.sdk.player.setPlaybackVolume(volumePercent);
     }
 
     public async skip() {
         if (!this.sdk) {
             return;
         }
-        this.sdk.player.skipToNext(undefined).catch(_ => { });
+        await this.sdk.player.skipToNext(undefined).catch(_ => { });
     }
 
     public async rewind() {
         if (!this.sdk) {
             return;
         }
-        this.sdk.player.skipToPrevious(undefined).catch(_ => { });
+        await this.sdk.player.skipToPrevious(undefined).catch(_ => { });
     }
 
 

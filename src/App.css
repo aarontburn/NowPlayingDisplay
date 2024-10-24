@@ -5,9 +5,11 @@ p {
 }
 
 body {
-    overflow-y: hidden; /* Hide vertical scrollbar */
-    overflow-x: hidden; /* Hide horizontal scrollbar */
-  }
+    overflow-y: hidden;
+    /* Hide vertical scrollbar */
+    overflow-x: hidden;
+    /* Hide horizontal scrollbar */
+}
 
 #album-art {
     width: 100%;
@@ -54,10 +56,10 @@ body {
     justify-content: left;
 
     position: absolute;
-    left: 5em;
-    bottom: 5em;
+    left: 3em;
+    bottom: 3em;
 
-    
+
     color: whitesmoke;
 
 }
@@ -75,4 +77,12 @@ body {
 
 #timestamp {
     margin: 0 2em;
+}
+
+#text-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    width: calc(100% - 1em);
+    margin-right: 1em;
 }
