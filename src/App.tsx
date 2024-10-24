@@ -27,18 +27,23 @@ const Home = () => {
 
 
 	return <div id='container'>
-		<img
-			id='album-art'
-			src={currentTrack.images[0].url}
-			alt='Background album art display.'
-		>
-		</img>
+		{
+			currentTrack.images[0].url !== '' &&
+			<img
+				id='album-art'
+				src={currentTrack.images[0].url}
+				alt='Background album art display.'
+			>
+			</img>
+
+		}
 
 		<p id='fullscreen-button' onClick={() => {
 			document.exitFullscreen().catch(() => { document.getElementById('container').requestFullscreen() });
-		}}>⛶</p>
+		}}>&#x26F6;</p>
 
-		{currentTrack.songPosition !== -1 &&
+		{
+			currentTrack.songPosition !== -1 &&
 			<div id='controls'>
 				<div style={{ display: 'flex' }}>
 					<p onClick={() => {
