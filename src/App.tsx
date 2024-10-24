@@ -2,8 +2,9 @@ import './App.css';
 import { Route, Routes } from "react-router-dom";
 import { CurrentSong, Spotify } from './Spotify';
 import { useEffect, useState } from 'react';
+import fitty from 'fitty';
 
-const RERENDER_INTERVAL: number = 5000
+const RERENDER_INTERVAL: number = 2500
 
 function App() {
 	return (
@@ -19,16 +20,11 @@ const Home = () => {
 	const [currentTrack, setCurrentTrack] = useState(undefined as CurrentSong)
 
 	useEffect(() => {
-		setInterval(async () => {
-			spotify.getCurrentTrack().then(setCurrentTrack);
-		}, RERENDER_INTERVAL)
-	}, [])
-
-	useEffect(() => {
-		(async () => {
-			spotify.getCurrentTrack().then(setCurrentTrack);
-		})()
+		const getTrack = async () => spotify.getCurrentTrack().then(setCurrentTrack);
+		getTrack()
+		setInterval(getTrack, RERENDER_INTERVAL);
 	}, [spotify])
+
 
 	return <div id='container'>
 		<img id='album-art' src={currentTrack ? currentTrack.images[0].url : ''}></img>
@@ -36,7 +32,7 @@ const Home = () => {
 		<div id='details-container'>
 			<img id='small-album-art' src={currentTrack ? currentTrack.images[0].url : ''}></img>
 
-			<div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'left' }}>
+			<div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'left', width: '100%' }}>
 				<p onClick={() => {
 					document.exitFullscreen().catch(() => { document.getElementById('container').requestFullscreen() })
 				}} id='song-name'>{currentTrack ? currentTrack.songName : ''}</p>
