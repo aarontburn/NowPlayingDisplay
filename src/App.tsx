@@ -1,7 +1,7 @@
 import './App.css';
 import { Route, Routes } from "react-router-dom";
-import { CurrentSong, Spotify } from './Spotify';
-import { useEffect, useState } from 'react';
+import { defaultNoSong, Spotify } from './Spotify';
+import { useCallback, useEffect, useState } from 'react';
 
 const RERENDER_INTERVAL: number = 1000
 
@@ -16,45 +16,62 @@ function App() {
 const Home = () => {
 	const [spotify] = useState(() => new Spotify());
 
-	const [currentTrack, setCurrentTrack] = useState(undefined as CurrentSong);
-	const getTrack = async () => spotify.getCurrentTrack().then(setCurrentTrack);
-
+	const [currentTrack, setCurrentTrack] = useState({ ...defaultNoSong });
+	const getTrack = useCallback(async () => spotify.getCurrentTrack().then(setCurrentTrack), [spotify]);
 
 	useEffect(() => {
-		getTrack()
+		getTrack();
 		const interval = setInterval(getTrack, RERENDER_INTERVAL);
-		return () => clearInterval(interval)
-	}, [spotify])
+		return () => clearInterval(interval);
+	}, [spotify, getTrack]);
 
 
 	return <div id='container'>
-		<img id='album-art' src={currentTrack ? currentTrack.images[0].url : ''}></img>
+		<img
+			id='album-art'
+			src={currentTrack.images[0].url}
+			alt='Background album art display.'
+		>
+		</img>
 
-		<div id='controls'>
-			<p onClick={() => {
-				if (spotify) {
-					spotify.rewind().then(() => getTrack());
-				}
-			}}>⟻</p>
+		<p id='fullscreen-button' onClick={() => {
+			document.exitFullscreen().catch(() => { document.getElementById('container').requestFullscreen() });
+		}}>⛶</p>
 
-			<p id='timestamp'>{currentTrack ? msToTime(currentTrack.songPosition) : '0:00'}/{currentTrack ? msToTime(currentTrack.songLength) : '0:00'}</p>
+		{currentTrack.songPosition !== -1 &&
+			<div id='controls'>
+				<div style={{ display: 'flex' }}>
+					<p onClick={() => {
+						if (spotify) {
+							spotify.rewind().then(() => getTrack());
+						}
+					}}>⟻</p>
 
-			<p onClick={() => {
-				if (spotify) {
-					spotify.skip().then(() => getTrack());
-				}
-			}}>⟼</p>
-		</div>
+					<p id='timestamp'>{msToTime(currentTrack.songPosition)} / {msToTime(currentTrack.songLength)}</p>
+
+					<p onClick={() => {
+						if (spotify) {
+							spotify.skip().then(() => getTrack());
+						}
+					}}>⟼</p>
+				</div>
+			</div>
+		}
+
+
 
 
 		<div id='details-container'>
-			<img id='small-album-art' src={currentTrack ? currentTrack.images[0].url : ''}></img>
+			<img
+				id='small-album-art'
+				src={currentTrack.images[0].url}
+				alt='Small album art display.'
+			>
+			</img>
 
 			<div id='text-container'>
-				<p onClick={() => {
-					document.exitFullscreen().catch(() => { document.getElementById('container').requestFullscreen() })
-				}} id='song-name'>{currentTrack ? currentTrack.songName : ''}</p>
-				<p id='artists'>{currentTrack ? currentTrack.artists.join(', ') : ''}</p>
+				<p id='song-name'>{currentTrack.songName}</p>
+				<p id='artists'>{currentTrack.artists.join(', ')}</p>
 
 			</div>
 
@@ -64,9 +81,13 @@ const Home = () => {
 }
 
 const msToTime = (ms: number): string => {
-	const minutes: number = Math.floor(ms / 1000 / 60)
-	const seconds: number = Math.floor((ms / 1000) - (60 * minutes))
-	return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`
+	if (ms === -1) {
+		return '0:00';
+	}
+
+	const minutes: number = Math.floor(ms / 1000 / 60);
+	const seconds: number = Math.floor((ms / 1000) - (60 * minutes));
+	return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
 }
 
 

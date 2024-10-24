@@ -1,8 +1,8 @@
-import { AccessToken, Device, SpotifyApi, Track } from '@spotify/web-api-ts-sdk';
+import { AccessToken, SpotifyApi, Track } from '@spotify/web-api-ts-sdk';
 
 
 const i: string = 'dd3af8424e834918ae856cf21023fc5b'
-const s: string = 'ee35c5de002743ec807c5c1583e03ff3'
+// const _: string = 'ee35c5de002743ec807c5c1583e03ff3'
 const re: string = 'http://localhost:3000/'
 const SCOPE: string[] = ['user-read-currently-playing', 'user-read-playback-state', 'user-modify-playback-state']
 
@@ -15,6 +15,15 @@ export interface CurrentSong {
     images: any[],
     songLength: number,
     songPosition: number
+}
+
+export const defaultNoSong: CurrentSong = {
+    albumName: '',
+    songName: 'No Song Playing',
+    artists: [],
+    images: [{ url: '' }],
+    songLength: -1,
+    songPosition: -1
 }
 
 
@@ -36,25 +45,11 @@ export class Spotify {
 
     public async getCurrentTrack(): Promise<CurrentSong> {
         if (!this.sdk) {
-            return {
-                albumName: '',
-                songName: '',
-                artists: [],
-                images: [{ url: '' }],
-                songLength: -1,
-                songPosition: -1
-            }
+            return { ...defaultNoSong };
         }
         const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack().catch(err => console.log(err));
         if (!currentTrack) {
-            return {
-                albumName: '',
-                songName: 'No Song Playing',
-                artists: [],
-                images: [{ url: '' }],
-                songLength: -1,
-                songPosition: -1
-            }
+            return { ...defaultNoSong };
         }
 
         const song: Track = currentTrack.item as Track;
