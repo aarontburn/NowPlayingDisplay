@@ -2,7 +2,6 @@ import './App.css';
 import { Route, Routes } from "react-router-dom";
 import { CurrentSong, Spotify } from './Spotify';
 import { useEffect, useState } from 'react';
-import fitty from 'fitty';
 
 const RERENDER_INTERVAL: number = 2500
 
