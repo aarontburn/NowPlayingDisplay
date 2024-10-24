@@ -82,9 +82,9 @@ const Home = () => {
 
 
 			<div id='text-container'>
+				<p id='album-name'>{currentTrack.albumName}</p>
 				<p id='song-name'>{currentTrack.songName}</p>
 				<p id='artists'>{currentTrack.artists.join(', ')}</p>
-				<p id='album-name'>{currentTrack.albumName}</p>
 
 			</div>
 
