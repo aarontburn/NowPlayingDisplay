@@ -14,19 +14,29 @@ function App() {
 }
 
 const Home = () => {
-	const [spotify] = useState(() => new Spotify())
+	const [spotify] = useState(() => new Spotify());
 
-	const [currentTrack, setCurrentTrack] = useState(undefined as CurrentSong)
+	const [currentTrack, setCurrentTrack] = useState(undefined as CurrentSong);
 
 	useEffect(() => {
 		const getTrack = async () => spotify.getCurrentTrack().then(setCurrentTrack);
 		getTrack()
-		setInterval(getTrack, RERENDER_INTERVAL);
+		const interval = setInterval(getTrack, RERENDER_INTERVAL);
+		return () => clearInterval(interval)
 	}, [spotify])
 
 
 	return <div id='container'>
 		<img id='album-art' src={currentTrack ? currentTrack.images[0].url : ''}></img>
+
+		<div id='controls'>
+			<p onClick={() => { if (spotify) spotify.rewind() }}>⟻</p>
+
+			<p id='timestamp'>{currentTrack ? msToTime(currentTrack.songPosition) : '0:00'}/{currentTrack ? msToTime(currentTrack.songLength) : '0:00'}</p>
+
+			<p onClick={() => { if (spotify) spotify.skip() }}>⟼</p>
+		</div>
+
 
 		<div id='details-container'>
 			<img id='small-album-art' src={currentTrack ? currentTrack.images[0].url : ''}></img>
@@ -42,6 +52,12 @@ const Home = () => {
 		</div>
 
 	</div>
+}
+
+const msToTime = (ms: number): string => {
+	const minutes: number = Math.floor(ms / 1000 / 60)
+	const seconds: number = Math.round((ms / 1000) - (60 * minutes))
+	return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`
 }
 
 

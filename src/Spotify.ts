@@ -6,6 +6,8 @@ const s: string = 'ee35c5de002743ec807c5c1583e03ff3'
 const re: string = 'http://localhost:3000/'
 const SCOPE: string[] = ['user-read-currently-playing', 'user-read-playback-state', 'user-modify-playback-state']
 
+
+
 export interface CurrentSong {
     albumName: string,
     songName: string,
@@ -45,7 +47,6 @@ export class Spotify {
         }
 
         const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack();
-        console.log(currentTrack)
         if (!currentTrack) {
             return {
                 albumName: '',
@@ -85,12 +86,15 @@ export class Spotify {
 
     public async play() {
         if (this.sdk) {
-            this.sdk.player.startResumePlayback(undefined).catch(err => { })
+            this.sdk.player.startResumePlayback(undefined).catch(_ => { })
         }
     }
 
     public async pause() {
-        this.sdk.player.pausePlayback(undefined).catch(err => { })
+        if (!this.sdk) {
+            return;
+        }
+        this.sdk.player.pausePlayback(undefined).catch(_ => { })
     }
 
     public async getCurrentDevice(): Promise<Device> {
@@ -99,13 +103,27 @@ export class Spotify {
 
     public async setVolume(volumePercent: number) {
         if (volumePercent < 0) {
-            volumePercent = 0
+            volumePercent = 0;
         }
         if (volumePercent > 100) {
             volumePercent = 100;
         }
 
-        this.sdk.player.setPlaybackVolume(volumePercent)
+        this.sdk.player.setPlaybackVolume(volumePercent);
+    }
+
+    public async skip() {
+        if (!this.sdk) {
+            return;
+        }
+        this.sdk.player.skipToNext(undefined).catch(_ => { });
+    }
+
+    public async rewind() {
+        if (!this.sdk) {
+            return;
+        }
+        this.sdk.player.skipToPrevious(undefined).catch(_ => { });
     }
 
 

@@ -4,24 +4,31 @@ p {
     font-family: Helvetica, sans-serif, Arial;
 }
 
+body {
+    overflow-y: hidden; /* Hide vertical scrollbar */
+    overflow-x: hidden; /* Hide horizontal scrollbar */
+  }
+
 #album-art {
     width: 100%;
     position: absolute;
     filter: brightness(50%);
+    z-index: 0;
 }
 
 #song-name {
     font-size: 2.75em;
     margin-bottom: 0.25em;
     font-weight: 600;
-
-
 }
+
 
 #artists {
     font-size: 1.5em;
     font-weight: 300;
+
 }
+
 
 #container {
     height: 100vh;
@@ -33,10 +40,12 @@ p {
     background-color: black;
 }
 
+
 #small-album-art {
     height: 33vh;
     margin-right: 3em;
 }
+
 
 #details-container {
     display: flex;
@@ -49,7 +58,21 @@ p {
     bottom: 5em;
 
     
-    z-index: 1;
     color: whitesmoke;
 
+}
+
+#controls {
+    z-index: 1;
+    color: whitesmoke;
+    position: absolute;
+    top: 1em;
+    font-size: 2em;
+
+
+    display: flex;
+}
+
+#timestamp {
+    margin: 0 2em;
 }
