@@ -20,24 +20,23 @@ body {
     z-index: 0;
 }
 
-#song-name {
-    font-size: 2.75em;
-    font-weight: 600;
-    margin-bottom: 0.5em;
-}
+
 
 #album-name {
     font-size: 1.5em;
     font-weight: 550;
-    margin-bottom: 0.25em;
-
+    margin-bottom: 0.75vh;
 }
 
+#song-name {
+    font-size: 2.75em;
+    font-weight: 600;
+    margin-bottom: 2vh;
+}
 
 #artists {
     font-size: 1.5em;
     font-weight: 300;
-
 }
 
 
