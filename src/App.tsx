@@ -29,6 +29,9 @@ const SVGControl = ({ id = '', src, onClick }: { id?: string, src: string, onCli
 	</img>
 }
 
+const Spacer = ({ spacing = 'auto' }: { spacing: string }) => <div style={{ marginRight: spacing }}></div>
+
+
 const Home = () => {
 	const [spotify] = useState(() => new Spotify());
 
@@ -36,6 +39,7 @@ const Home = () => {
 	const getTrack = useCallback(async () => spotify.getCurrentTrack().then(setCurrentTrack), [spotify]);
 
 	const [controlsHidden, setControlsHidden] = useState(false);
+	const [displayAlbumArt, setUseAlbumArt] = useState(true);
 
 
 	useEffect(() => {
@@ -45,12 +49,14 @@ const Home = () => {
 	}, [spotify, getTrack]);
 
 
+
+
 	return <div id='container'>
 		{
-			currentTrack.images[0].url !== '' &&
+			currentTrack.image.url !== '' &&
 			<img
 				id='album-art'
-				src={currentTrack.images[0].url}
+				src={displayAlbumArt ? currentTrack.image.url : currentTrack.artistImage.url}
 				alt='Background album art display.'
 			>
 			</img>
@@ -72,11 +78,11 @@ const Home = () => {
 						onClick={() => spotify && spotify.rewind().then(() => getTrack())} />
 
 					{/* <p id='timestamp'>{msToTime(currentTrack.songPosition)} / {msToTime(currentTrack.songLength)}</p> */}
-
+					<Spacer spacing='1em' />
 					<SVGControl
 						src={playSVG}
-						onClick={() => spotify && spotify.togglePlay()} />
-
+						onClick={() => setUseAlbumArt((prev) => !prev)} />
+					<Spacer spacing='1em' />
 					<SVGControl
 						src={skipSVG}
 						onClick={() => spotify && spotify.skip().then(() => getTrack())} />
@@ -105,9 +111,9 @@ const Home = () => {
 		<div id='details-container'>
 			<div id='small-album-art'>
 				{
-					currentTrack.images[0].url !== '' &&
+					currentTrack.image.url !== '' &&
 					<img
-						src={currentTrack.images[0].url}
+						src={currentTrack.image.url}
 						alt='Small album art display.'
 						style={{ height: '100%' }}
 					>
