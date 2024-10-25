@@ -56,7 +56,7 @@ const Home = () => {
 			currentTrack.image.url !== '' &&
 			<img
 				id='album-art'
-				src={displayAlbumArt ? currentTrack.image.url : currentTrack.artistImage.url}
+				src={currentTrack.image.url}
 				alt='Background album art display.'
 			>
 			</img>
@@ -113,7 +113,7 @@ const Home = () => {
 				{
 					currentTrack.image.url !== '' &&
 					<img
-						src={currentTrack.image.url}
+						src={displayAlbumArt ? currentTrack.image.url : currentTrack.artistImage.url}
 						alt='Small album art display.'
 						style={{ height: '100%' }}
 					>
