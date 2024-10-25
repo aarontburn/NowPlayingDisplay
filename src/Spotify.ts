@@ -48,7 +48,6 @@ export class Spotify {
             setInterval(this.refreshToken, this.token.expires_in * 1000);
         } catch (err) {
             console.log(err)
-            window.location.reload()
         }
 
     }
