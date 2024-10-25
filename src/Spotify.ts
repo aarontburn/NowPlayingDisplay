@@ -50,7 +50,11 @@ export class Spotify {
         if (!this.sdk) {
             return { ...defaultNoSong };
         }
-        const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack().catch(err => this.refreshToken());
+        const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack().catch(err => {
+            if ((err.description as string).includes('refresh_token')) {
+                this.refreshToken();
+            }
+        });
         if (!currentTrack) {
             return { ...defaultNoSong };
         }
