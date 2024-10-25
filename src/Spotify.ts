@@ -15,7 +15,6 @@ export interface CurrentSong {
     image: Image,
     songLength: number,
     songPosition: number,
-    artistImage: Image
 }
 
 const noImage: Image = { url: '', width: -1, height: -1 }
@@ -27,7 +26,6 @@ export const defaultNoSong: CurrentSong = {
     image: { url: '', width: -1, height: -1 },
     songLength: -1,
     songPosition: -1,
-    artistImage: { ...noImage },
 }
 
 
@@ -57,15 +55,12 @@ export class Spotify {
                 this.refreshToken();
             }
         });
-        console.log(currentTrack)
         if (!currentTrack) {
             return { ...defaultNoSong };
         }
 
         const song: Track = currentTrack.item as Track;
 
-        // const artistBackground: Image = (await this.sdk.artists.get(song.artists[0].id)).images[0]
-        // console.log(await this.sdk.artists.get(song.artists[0].id))
 
         return {
             albumName: song.album.name,
@@ -74,7 +69,6 @@ export class Spotify {
             image: song.album.images.length === 0 ? { ...noImage } : song.album.images[0],
             songLength: song.duration_ms,
             songPosition: currentTrack.progress_ms,
-            artistImage: { ...noImage }
         }
 
 
@@ -83,7 +77,7 @@ export class Spotify {
     }
 
     public async togglePlay() {
-        if (this.sdk) {
+        if (!this.sdk) {
             return;
         }
 

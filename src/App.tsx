@@ -8,7 +8,8 @@ import playSVG from './assets/play.svg';
 import rewindSVG from './assets/rewind.svg';
 import skipSVG from './assets/skip.svg';
 
-const RERENDER_INTERVAL: number = 1000
+const POLL_INTERVAL_MS: number = 1000;
+const HIDE_CONTROLS_AFTER_MS: number = 2000;
 
 function App() {
 	return (
@@ -38,20 +39,28 @@ const Home = () => {
 	const [currentTrack, setCurrentTrack] = useState({ ...defaultNoSong });
 	const getTrack = useCallback(async () => spotify.getCurrentTrack().then(setCurrentTrack), [spotify]);
 
-	const [controlsHidden, setControlsHidden] = useState(false);
-	const [displayAlbumArt, setUseAlbumArt] = useState(true);
+	const [showControls, setControlsHidden] = useState(false);
+	const [controlTimeout, setControlTimeout] = useState(undefined as NodeJS.Timeout)
 
 
 	useEffect(() => {
 		getTrack();
-		const interval = setInterval(getTrack, RERENDER_INTERVAL);
+		const interval = setInterval(getTrack, POLL_INTERVAL_MS);
 		return () => clearInterval(interval);
 	}, [spotify, getTrack]);
 
+	const onMouseDown = useCallback(() => {
+		setControlsHidden(true);
+
+		if (controlTimeout !== undefined) {
+			clearTimeout(controlTimeout)
+		}
+
+		setControlTimeout(setTimeout(() => { console.log(showControls); setControlsHidden(false) }, HIDE_CONTROLS_AFTER_MS))
+	}, [showControls, controlTimeout]);
 
 
-
-	return <div id='container'>
+	return <div id='container' onMouseDown={onMouseDown}>
 		{
 			currentTrack.image.url !== '' &&
 			<img
@@ -63,32 +72,35 @@ const Home = () => {
 
 		}
 
-		<SVGControl
-			id='fullscreen-button'
-			src={fullscreenSVG}
-			onClick={() => { document.exitFullscreen().catch(() => { document.getElementById('container').requestFullscreen() }) }}
-		/>
+
 
 		{
-			currentTrack.songPosition !== -1 &&
-			<div id='controls'>
-				<div style={{ display: 'flex', alignItems: 'center' }}>
-					<SVGControl
-						src={rewindSVG}
-						onClick={() => spotify && spotify.rewind().then(() => getTrack())} />
+			showControls &&
+			<>
+				<SVGControl
+					id='fullscreen-button'
+					src={fullscreenSVG}
+					onClick={() => { document.exitFullscreen().catch(() => { document.getElementById('container').requestFullscreen() }) }}
+				/>
 
-					{/* <p id='timestamp'>{msToTime(currentTrack.songPosition)} / {msToTime(currentTrack.songLength)}</p> */}
-					<Spacer spacing='1em' />
-					<SVGControl
-						src={playSVG}
-						onClick={() => setUseAlbumArt((prev) => !prev)} />
-					<Spacer spacing='1em' />
-					<SVGControl
-						src={skipSVG}
-						onClick={() => spotify && spotify.skip().then(() => getTrack())} />
+				<div id='controls'>
+					<div style={{ display: 'flex', alignItems: 'center' }}>
+						<SVGControl
+							src={rewindSVG}
+							onClick={() => spotify && spotify.rewind().then(() => getTrack())} />
+
+						{/* <p id='timestamp'>{msToTime(currentTrack.songPosition)} / {msToTime(currentTrack.songLength)}</p> */}
+						<Spacer spacing='1em' />
+						<SVGControl
+							src={playSVG}
+							onClick={() => spotify && spotify.togglePlay()} />
+						<Spacer spacing='1em' />
+						<SVGControl
+							src={skipSVG}
+							onClick={() => spotify && spotify.skip().then(() => getTrack())} />
 
 
-					{/* <p onClick={() => {
+						{/* <p onClick={() => {
 						if (spotify) {
 							spotify.rewind().then(() => getTrack());
 						}
@@ -101,8 +113,11 @@ const Home = () => {
 							spotify.skip().then(() => getTrack());
 						}
 					}}>⟼</p> */}
+					</div>
 				</div>
-			</div>
+			</>
+
+
 		}
 
 
@@ -113,7 +128,7 @@ const Home = () => {
 				{
 					currentTrack.image.url !== '' &&
 					<img
-						src={displayAlbumArt ? currentTrack.image.url : currentTrack.artistImage.url}
+						src={currentTrack.image.url}
 						alt='Small album art display.'
 						style={{ height: '100%' }}
 					>
