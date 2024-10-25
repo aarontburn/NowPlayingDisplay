@@ -1,7 +1,7 @@
 import './App.css';
 import { Route, Routes } from "react-router-dom";
 import { defaultNoSong, Spotify } from './Spotify';
-import { ImgHTMLAttributes, useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import fullscreenSVG from './assets/fullscreen.svg';
 import pauseSVG from './assets/pause.svg';
 import playSVG from './assets/play.svg';
@@ -43,6 +43,7 @@ const Home = () => {
 	const [controlTimeout, setControlTimeout] = useState(undefined as NodeJS.Timeout)
 
 
+
 	useEffect(() => {
 		getTrack();
 		const interval = setInterval(getTrack, POLL_INTERVAL_MS);
@@ -56,7 +57,7 @@ const Home = () => {
 			clearTimeout(controlTimeout)
 		}
 
-		setControlTimeout(setTimeout(() => { console.log(showControls); setControlsHidden(false) }, HIDE_CONTROLS_AFTER_MS))
+		setControlTimeout(setTimeout(() => setControlsHidden(false), HIDE_CONTROLS_AFTER_MS))
 	}, [showControls, controlTimeout]);
 
 
@@ -92,7 +93,7 @@ const Home = () => {
 						{/* <p id='timestamp'>{msToTime(currentTrack.songPosition)} / {msToTime(currentTrack.songLength)}</p> */}
 						<Spacer spacing='1em' />
 						<SVGControl
-							src={playSVG}
+							src={currentTrack.isPlaying ? pauseSVG : playSVG}
 							onClick={() => spotify && spotify.togglePlay()} />
 						<Spacer spacing='1em' />
 						<SVGControl

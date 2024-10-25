@@ -15,6 +15,7 @@ export interface CurrentSong {
     image: Image,
     songLength: number,
     songPosition: number,
+    isPlaying: boolean
 }
 
 const noImage: Image = { url: '', width: -1, height: -1 }
@@ -26,6 +27,7 @@ export const defaultNoSong: CurrentSong = {
     image: { url: '', width: -1, height: -1 },
     songLength: -1,
     songPosition: -1,
+    isPlaying: false
 }
 
 
@@ -39,10 +41,16 @@ export class Spotify {
     }
 
     private async build() {
-        this.token = (await SpotifyApi.performUserAuthorization(i, re, SCOPE, async (_) => { })).accessToken;
-        this.sdk = SpotifyApi.withAccessToken(i, this.token);
+        try {
+            this.token = (await SpotifyApi.performUserAuthorization(i, re, SCOPE, async (_) => { })).accessToken;
+            this.sdk = SpotifyApi.withAccessToken(i, this.token);
 
-        setInterval(this.refreshToken, this.token.expires_in * 1000);
+            setInterval(this.refreshToken, this.token.expires_in * 1000);
+        } catch (err) {
+            console.log(err)
+            window.location.reload()
+        }
+
     }
 
 
@@ -51,7 +59,7 @@ export class Spotify {
             return { ...defaultNoSong };
         }
         const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack().catch(err => {
-            if ((err.description as string).includes('refresh_token')) {
+            if ((err.description as string)?.includes('refresh_token')) {
                 this.refreshToken();
             }
         });
@@ -61,7 +69,6 @@ export class Spotify {
 
         const song: Track = currentTrack.item as Track;
 
-
         return {
             albumName: song.album.name,
             songName: song.name,
@@ -69,11 +76,8 @@ export class Spotify {
             image: song.album.images.length === 0 ? { ...noImage } : song.album.images[0],
             songLength: song.duration_ms,
             songPosition: currentTrack.progress_ms,
+            isPlaying: currentTrack.is_playing
         }
-
-
-
-
     }
 
     public async togglePlay() {
@@ -82,11 +86,12 @@ export class Spotify {
         }
 
         const currentState = await this.sdk.player.getPlaybackState();
-        if (currentState.is_playing) {
-            await this.pause();
+        if (!currentState || !currentState.is_playing) {
+            await this.play();
             return;
         }
-        await this.play()
+
+        await this.pause();
     }
 
     public async play() {
