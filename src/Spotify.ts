@@ -18,6 +18,8 @@ export interface CurrentSong {
     artistImage: Image
 }
 
+const noImage: Image = { url: '', width: -1, height: -1 }
+
 export const defaultNoSong: CurrentSong = {
     albumName: ' ',
     songName: 'No Song Playing',
@@ -25,7 +27,7 @@ export const defaultNoSong: CurrentSong = {
     image: { url: '', width: -1, height: -1 },
     songLength: -1,
     songPosition: -1,
-    artistImage: { url: '', width: -1, height: -1 },
+    artistImage: { ...noImage },
 }
 
 
@@ -55,24 +57,26 @@ export class Spotify {
                 this.refreshToken();
             }
         });
+        console.log(currentTrack)
         if (!currentTrack) {
             return { ...defaultNoSong };
         }
 
         const song: Track = currentTrack.item as Track;
 
-        const artistBackground: Image = (await this.sdk.artists.get(song.artists[0].id)).images[0]
-        console.log(await this.sdk.artists.get(song.artists[0].id))
+        // const artistBackground: Image = (await this.sdk.artists.get(song.artists[0].id)).images[0]
+        // console.log(await this.sdk.artists.get(song.artists[0].id))
 
         return {
             albumName: song.album.name,
             songName: song.name,
             artists: song.artists.map(a => a.name),
-            image: song.album.images.length === 0 ? { url: '', width: -1, height: -1 } : song.album.images[0],
+            image: song.album.images.length === 0 ? { ...noImage } : song.album.images[0],
             songLength: song.duration_ms,
             songPosition: currentTrack.progress_ms,
-            artistImage: artistBackground
+            artistImage: { ...noImage }
         }
+        this.sdk.makeRequest
 
 
 
