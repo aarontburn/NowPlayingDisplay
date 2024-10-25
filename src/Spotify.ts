@@ -76,7 +76,6 @@ export class Spotify {
             songPosition: currentTrack.progress_ms,
             artistImage: { ...noImage }
         }
-        this.sdk.makeRequest
 
 
 
