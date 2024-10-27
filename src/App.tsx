@@ -37,7 +37,11 @@ const Home = () => {
 	const [spotify] = useState(() => new Spotify());
 
 	const [currentTrack, setCurrentTrack] = useState({ ...defaultNoSong });
-	const getTrack = useCallback(async () => spotify.getCurrentTrack().then(setCurrentTrack), [spotify]);
+	const getTrack = useCallback(async () => spotify.getCurrentTrack().then((track) => {
+		if (track.songLength !== -1) {
+			setCurrentTrack(track)
+		}
+	}), [spotify]);
 
 	const [showControls, setControlsHidden] = useState(false);
 	const [controlTimeout, setControlTimeout] = useState(undefined as NodeJS.Timeout)

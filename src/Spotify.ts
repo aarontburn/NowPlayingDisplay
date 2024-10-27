@@ -1,4 +1,4 @@
-import { AccessToken, Image, SpotifyApi, Track } from '@spotify/web-api-ts-sdk';
+import { AccessToken, AuthorizationCodeWithPKCEStrategy, Image, SpotifyApi, Track } from '@spotify/web-api-ts-sdk';
 
 
 const i: string = 'dd3af8424e834918ae856cf21023fc5b'
@@ -47,8 +47,10 @@ export class Spotify {
 
             setInterval(this.refreshToken, this.token.expires_in * 1000);
         } catch (err) {
-            console.log(err)
+            console.log(Object.keys(err))
         }
+
+
 
     }
 

@@ -113,5 +113,6 @@ body {
 
 .svg {
     height: var(--svg-size);
+    min-height: var(--svg-size);
 
 }
