@@ -47,10 +47,10 @@ export class Spotify {
 
             setInterval(this.refreshToken, this.token.expires_in * 1000);
         } catch (err) {
-            console.log(Object.keys(err))
+            if ((err as Error).message.includes(`No verifier found in cache - can't validate query string callback parameters.`)) {
+                setTimeout(() => window.location.reload(), 500);
+            }
         }
-
-
 
     }
 
