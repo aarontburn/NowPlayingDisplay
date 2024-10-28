@@ -45,7 +45,7 @@ export class Spotify {
             this.token = (await SpotifyApi.performUserAuthorization(i, re, SCOPE, async (_) => { })).accessToken;
             this.sdk = SpotifyApi.withAccessToken(i, this.token);
 
-            setInterval(this.refreshToken.bind(this), this.token.expires_in * 1000);
+            setInterval(this.refreshToken.bind(this), (this.token.expires_in * 1000) - 2000);
             console.log("Successfully authenticated with Spotify")
         } catch (err) {
             console.log(err)
@@ -141,7 +141,7 @@ export class Spotify {
         console.log("Refreshing token...")
         console.log("Old Token:")
         console.log(this.token)
-        const url = "https://accounts.spotify.com/api/token";
+        const url: string = "https://accounts.spotify.com/api/token";
 
         const payload: RequestInit = {
             method: 'POST',
