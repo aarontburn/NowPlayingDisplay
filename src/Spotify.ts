@@ -1,11 +1,11 @@
-import { AccessToken, AuthorizationCodeWithPKCEStrategy, Image, SpotifyApi, Track } from '@spotify/web-api-ts-sdk';
+import { AccessToken, Image, SpotifyApi, Track } from '@spotify/web-api-ts-sdk';
 
 
 const i: string = 'dd3af8424e834918ae856cf21023fc5b'
 // const _: string = 'ee35c5de002743ec807c5c1583e03ff3'
 const re: string = 'http://localhost:3000/'
 const SCOPE: string[] = ['user-read-currently-playing', 'user-read-playback-state', 'user-modify-playback-state']
-
+const PAGE_REFRESH_ERR: string = `No verifier found in cache - can't validate query string callback parameters.`
 
 
 export interface CurrentSong {
@@ -45,9 +45,11 @@ export class Spotify {
             this.token = (await SpotifyApi.performUserAuthorization(i, re, SCOPE, async (_) => { })).accessToken;
             this.sdk = SpotifyApi.withAccessToken(i, this.token);
 
-            setInterval(this.refreshToken, this.token.expires_in * 1000);
+            setInterval(this.refreshToken.bind(this), this.token.expires_in * 1000);
+            console.log("Successfully authenticated with Spotify")
         } catch (err) {
-            if ((err as Error).message.includes(`No verifier found in cache - can't validate query string callback parameters.`)) {
+            console.log(err)
+            if ((err as Error).message.includes(PAGE_REFRESH_ERR)) {
                 setTimeout(() => window.location.reload(), 500);
             }
         }
@@ -60,9 +62,10 @@ export class Spotify {
             return { ...defaultNoSong };
         }
         const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack().catch(err => {
+            console.log(err)
             if ((err.description as string)?.includes('refresh_token')) {
                 this.refreshToken();
-            }
+            } 
         });
         if (!currentTrack) {
             return { ...defaultNoSong };
