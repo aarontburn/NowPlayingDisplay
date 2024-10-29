@@ -16,6 +16,7 @@ export interface CurrentSong {
     songLength: number,
     songPosition: number,
     isPlaying: boolean
+    songId: string
 }
 
 const noImage: Image = { url: '', width: -1, height: -1 }
@@ -27,7 +28,8 @@ export const defaultNoSong: CurrentSong = {
     image: { url: '', width: -1, height: -1 },
     songLength: -1,
     songPosition: -1,
-    isPlaying: false
+    isPlaying: false,
+    songId: ''
 }
 
 
@@ -35,17 +37,33 @@ export class Spotify {
 
     private sdk: SpotifyApi;
     private token: AccessToken
+    private currentlyRefreshing: boolean = false;
 
-    constructor() {
+
+    private static instance: Spotify;
+
+    public static getInstance(): Spotify {
+        if (!this.instance) {
+            this.instance = new Spotify()
+        }
+        return this.instance; 
+    }
+
+
+
+    private constructor() {
+        console.log("Creating a new instance of Spotify")
         this.build()
     }
 
     private async build() {
+
         try {
             this.token = (await SpotifyApi.performUserAuthorization(i, re, SCOPE, async (_) => { })).accessToken;
             this.sdk = SpotifyApi.withAccessToken(i, this.token);
 
             setInterval(this.refreshToken.bind(this), (this.token.expires_in * 1000) - 2000);
+
             console.log("Successfully authenticated with Spotify")
         } catch (err) {
             console.log(err)
@@ -58,7 +76,7 @@ export class Spotify {
 
 
     public async getCurrentTrack(): Promise<CurrentSong> {
-        if (!this.sdk) {
+        if (!this.sdk || this.currentlyRefreshing) {
             return { ...defaultNoSong };
         }
         const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack().catch(err => {
@@ -80,7 +98,8 @@ export class Spotify {
             image: song.album.images.length === 0 ? { ...noImage } : song.album.images[0],
             songLength: song.duration_ms,
             songPosition: currentTrack.progress_ms,
-            isPlaying: currentTrack.is_playing
+            isPlaying: currentTrack.is_playing,
+            songId: song.id
         }
     }
 
@@ -138,6 +157,11 @@ export class Spotify {
     }
 
     public async refreshToken() {
+        if (this.currentlyRefreshing) {
+            return;
+        }
+        this.currentlyRefreshing = true;
+
         console.log("Refreshing token...")
         console.log("Old Token:")
         console.log(this.token)
@@ -159,6 +183,8 @@ export class Spotify {
         console.log("New Token:")
         console.log(response)
         this.token = response;
+        this.currentlyRefreshing = false;
+
 
     }
 

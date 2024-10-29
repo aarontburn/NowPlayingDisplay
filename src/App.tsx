@@ -34,7 +34,7 @@ const Spacer = ({ spacing = 'auto' }: { spacing: string }) => <div style={{ marg
 
 
 const Home = () => {
-	const [spotify] = useState(() => new Spotify());
+	const [spotify] = useState(() => Spotify.getInstance());
 
 	const [currentTrack, setCurrentTrack] = useState({ ...defaultNoSong });
 	const getTrack = useCallback(async () => spotify.getCurrentTrack().then((track) => {
@@ -62,7 +62,7 @@ const Home = () => {
 		}
 
 		setControlTimeout(setTimeout(() => setControlsHidden(false), HIDE_CONTROLS_AFTER_MS))
-	}, [showControls, controlTimeout]);
+	}, [controlTimeout]);
 
 
 	return <div id='container' onMouseDown={onMouseDown}>
