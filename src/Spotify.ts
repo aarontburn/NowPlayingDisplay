@@ -1,11 +1,11 @@
 import { AccessToken, Image, SpotifyApi, Track } from '@spotify/web-api-ts-sdk';
+import { log } from './Global';
 
 
 const i: string = 'dd3af8424e834918ae856cf21023fc5b'
-// const _: string = 'ee35c5de002743ec807c5c1583e03ff3'
 const re: string = 'http://localhost:3000/'
 const SCOPE: string[] = ['user-read-currently-playing', 'user-read-playback-state', 'user-modify-playback-state']
-const PAGE_REFRESH_ERR: string = `No verifier found in cache - can't validate query string callback parameters.`
+const PAGE_REFRESH_ERR: string = `No verifier found in cache - can't validate query string callback parameters.`;
 
 
 export interface CurrentSong {
@@ -46,13 +46,13 @@ export class Spotify {
         if (!this.instance) {
             this.instance = new Spotify()
         }
-        return this.instance; 
+        return this.instance;
     }
 
 
 
     private constructor() {
-        console.log("Creating a new instance of Spotify")
+        log("Creating a new instance of Spotify.");
         this.build()
     }
 
@@ -64,9 +64,9 @@ export class Spotify {
 
             setInterval(this.refreshToken.bind(this), (this.token.expires_in * 1000) - 2000);
 
-            console.log("Successfully authenticated with Spotify")
+            log("Successfully authenticated with Spotify");
         } catch (err) {
-            console.log(err)
+            log(err)
             if ((err as Error).message.includes(PAGE_REFRESH_ERR)) {
                 setTimeout(() => window.location.reload(), 500);
             }
@@ -80,10 +80,10 @@ export class Spotify {
             return { ...defaultNoSong };
         }
         const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack().catch(err => {
-            console.log(err)
+            log(err)
             if ((err.description as string)?.includes('refresh_token')) {
                 this.refreshToken();
-            } 
+            }
         });
         if (!currentTrack) {
             return { ...defaultNoSong };
@@ -162,9 +162,9 @@ export class Spotify {
         }
         this.currentlyRefreshing = true;
 
-        console.log("Refreshing token...")
-        console.log("Old Token:")
-        console.log(this.token)
+        log("Refreshing token...")
+        log("Old Token:")
+        log(this.token)
         const url: string = "https://accounts.spotify.com/api/token";
 
         const payload: RequestInit = {
@@ -180,8 +180,8 @@ export class Spotify {
         }
         const body: Response = await fetch(url, payload);
         const response: AccessToken = (await body.json()) as AccessToken;
-        console.log("New Token:")
-        console.log(response)
+        log("New Token:")
+        log(response)
         this.token = response;
         this.currentlyRefreshing = false;
 
