@@ -1,7 +1,7 @@
 export const log = (...args: any[]): void => {
     let out = '';
     for (const arg of args) {
-        out += JSON.stringify(arg);
+        out += typeof arg === 'string' ? arg : JSON.stringify(arg);
     }
 
 
@@ -12,6 +12,5 @@ export const log = (...args: any[]): void => {
 export const getTimestamp = (): string => {
     return new Date().toLocaleTimeString()
 }
-
 
 

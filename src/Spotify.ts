@@ -2,11 +2,12 @@ import { AccessToken, Image, SpotifyApi, Track } from '@spotify/web-api-ts-sdk';
 import { log } from './Global';
 
 
+
 const i: string = 'dd3af8424e834918ae856cf21023fc5b'
 const re: string = 'http://localhost:3000/'
-const SCOPE: string[] = ['user-read-currently-playing', 'user-read-playback-state', 'user-modify-playback-state']
+const SCOPE: string[] = ['user-read-currently-playing', 'user-read-playback-state', 'user-modify-playback-state'];
 const PAGE_REFRESH_ERR: string = `No verifier found in cache - can't validate query string callback parameters.`;
-
+const REFRESH_OFFSET_MS: number = 10000;
 
 export interface CurrentSong {
     albumName: string,
@@ -38,6 +39,7 @@ export class Spotify {
     private sdk: SpotifyApi;
     private token: AccessToken
     private currentlyRefreshing: boolean = false;
+    private refreshInterval: NodeJS.Timer;
 
 
     private static instance: Spotify;
@@ -52,21 +54,30 @@ export class Spotify {
 
 
     private constructor() {
-        log("Creating a new instance of Spotify.");
-        this.build()
+        this.build();
+    }
+
+    private async cleanup() {
+        log("Cleaning Spotify Instance.")
+        this.token = undefined;
+        this.sdk = undefined;
+        clearInterval(this.refreshInterval);
     }
 
     private async build() {
+        log("Creating a new instance of Spotify.");
 
         try {
             this.token = (await SpotifyApi.performUserAuthorization(i, re, SCOPE, async (_) => { })).accessToken;
             this.sdk = SpotifyApi.withAccessToken(i, this.token);
 
-            setInterval(this.refreshToken.bind(this), (this.token.expires_in * 1000) - 2000);
-
             log("Successfully authenticated with Spotify");
+            log(`Token refresh occurs at ${new Date(this.token.expires).toLocaleTimeString()}`);
+
+            this.refreshInterval = setInterval(this.refreshToken.bind(this), (this.token.expires_in * 1000) - REFRESH_OFFSET_MS);
+
         } catch (err) {
-            log(err)
+            log(err);
             if ((err as Error).message.includes(PAGE_REFRESH_ERR)) {
                 setTimeout(() => window.location.reload(), 500);
             }
@@ -162,8 +173,8 @@ export class Spotify {
         }
         this.currentlyRefreshing = true;
 
-        log("Refreshing token...")
-        log("Old Token:")
+        log("Refreshing token...");
+        log("Old Token:");
         log(this.token)
         const url: string = "https://accounts.spotify.com/api/token";
 
@@ -179,13 +190,20 @@ export class Spotify {
             }),
         }
         const body: Response = await fetch(url, payload);
-        const response: AccessToken = (await body.json()) as AccessToken;
-        log("New Token:")
-        log(response)
+        const response: any = (await body.json());
+        log("New Token:");
+        log(response);
+
+        if (response.error !== undefined) {
+            this.cleanup();
+            this.build();
+            return;
+        }
+        log(`Token refresh occurs at ${new Date(this.token.expires).toLocaleTimeString()}`)
+
+
         this.token = response;
         this.currentlyRefreshing = false;
-
-
     }
 
 
