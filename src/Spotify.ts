@@ -79,7 +79,12 @@ export class Spotify {
             log(`Original Token:`);
             console.log(this.token);
 
-            this.setRefreshTimeout();
+            setTimeout(async () => {
+                log(`Token:`)
+                console.log(await this.sdk.getAccessToken())
+            }, 60000)
+
+            // this.setRefreshTimeout();
 
         } catch (err) {
             log(err);
@@ -203,6 +208,7 @@ export class Spotify {
 
         if (response.error !== undefined || response.expires === undefined) {
             this.rebuild();
+            this.currentlyRefreshing = false;
             return;
         }
         this.token = response;
@@ -214,6 +220,7 @@ export class Spotify {
         if (!this.setRefreshTimeout()) {
             log("Could not calculate refresh time. Rebuilding...")
             this.rebuild();
+            this.currentlyRefreshing = false;
             return;
         }
 
