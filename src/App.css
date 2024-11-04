@@ -1,6 +1,9 @@
 :root {
     --svg-size: 2rem;
+    cursor: none;
 }
+
+
 
 @font-face {
     font-family: 'Montserrat';

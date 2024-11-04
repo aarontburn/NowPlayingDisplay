@@ -55,13 +55,18 @@ const Home = () => {
 	}, [spotify, getTrack]);
 
 	const onMouseDown = useCallback(() => {
+		const root: HTMLElement = document.querySelector(':root') as HTMLElement
 		setControlsHidden(true);
 
 		if (controlTimeout !== undefined) {
-			clearTimeout(controlTimeout)
+			clearTimeout(controlTimeout);
 		}
+		root.style.setProperty("cursor", 'unset');
 
-		setControlTimeout(setTimeout(() => setControlsHidden(false), HIDE_CONTROLS_AFTER_MS))
+		setControlTimeout(setTimeout(() => {
+			root.style.setProperty("cursor", 'none');
+			setControlsHidden(false);
+		}, HIDE_CONTROLS_AFTER_MS))
 	}, [controlTimeout]);
 
 
