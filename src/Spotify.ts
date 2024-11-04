@@ -68,6 +68,7 @@ export class Spotify {
         log("Creating a new instance of Spotify.");
 
         try {
+            
             this.token = (await SpotifyApi.performUserAuthorization(i, re, SCOPE, async (_) => { })).accessToken;
             this.sdk = SpotifyApi.withAccessToken(i, this.token);
 
@@ -176,6 +177,8 @@ export class Spotify {
         log("Refreshing token...");
         log("Old Token:");
         log(this.token)
+
+
         const url: string = "https://accounts.spotify.com/api/token";
 
         const payload: RequestInit = {
@@ -194,7 +197,7 @@ export class Spotify {
         log("New Token:");
         log(response);
 
-        if (response.error !== undefined) {
+        if (response.error !== undefined || response.expires === undefined) {
             this.cleanup();
             this.build();
             return;

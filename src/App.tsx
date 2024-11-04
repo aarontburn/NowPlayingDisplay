@@ -7,6 +7,7 @@ import pauseSVG from './assets/pause.svg';
 import playSVG from './assets/play.svg';
 import rewindSVG from './assets/rewind.svg';
 import skipSVG from './assets/skip.svg';
+import infoSVG from './assets/info.svg';
 
 const POLL_INTERVAL_MS: number = 1000;
 const HIDE_CONTROLS_AFTER_MS: number = 2000;
@@ -44,7 +45,9 @@ const Home = () => {
 	}), [spotify]);
 
 	const [showControls, setControlsHidden] = useState(false);
-	const [controlTimeout, setControlTimeout] = useState(undefined as NodeJS.Timeout)
+	const [controlTimeout, setControlTimeout] = useState(undefined as NodeJS.Timeout);
+	const [showCredits, setShowCredits] = useState(false);
+
 
 
 
@@ -55,7 +58,7 @@ const Home = () => {
 	}, [spotify, getTrack]);
 
 	const onMouseDown = useCallback(() => {
-		const root: HTMLElement = document.querySelector(':root') as HTMLElement
+		const root: HTMLElement = document.querySelector(':root') as HTMLElement;
 		setControlsHidden(true);
 
 		if (controlTimeout !== undefined) {
@@ -82,16 +85,29 @@ const Home = () => {
 
 		}
 
+		{
+			showCredits &&
+			<>
+				<div id='credits'>
+					
+					
+
+				</div>
+			</>
+		}
+
 
 
 		{
 			showControls &&
 			<>
+
 				<SVGControl
-					id='fullscreen-button'
-					src={fullscreenSVG}
-					onClick={() => { document.exitFullscreen().catch(() => { document.getElementById('container').requestFullscreen() }) }}
+					id='info-button'
+					src={infoSVG}
+					onClick={() => setShowCredits((old) => !old)}
 				/>
+
 
 				<div id='controls'>
 					<div style={{ display: 'flex', alignItems: 'center' }}>
@@ -99,7 +115,6 @@ const Home = () => {
 							src={rewindSVG}
 							onClick={() => spotify && spotify.rewind().then(() => getTrack())} />
 
-						{/* <p id='timestamp'>{msToTime(currentTrack.songPosition)} / {msToTime(currentTrack.songLength)}</p> */}
 						<Spacer spacing='1em' />
 						<SVGControl
 							src={currentTrack.isPlaying ? pauseSVG : playSVG}
@@ -108,23 +123,14 @@ const Home = () => {
 						<SVGControl
 							src={skipSVG}
 							onClick={() => spotify && spotify.skip().then(() => getTrack())} />
-
-
-						{/* <p onClick={() => {
-						if (spotify) {
-							spotify.rewind().then(() => getTrack());
-						}
-					}}>⟻</p>
-
-					<p id='timestamp'>{msToTime(currentTrack.songPosition)} / {msToTime(currentTrack.songLength)}</p>
-
-					<p onClick={() => {
-						if (spotify) {
-							spotify.skip().then(() => getTrack());
-						}
-					}}>⟼</p> */}
 					</div>
 				</div>
+				<SVGControl
+					id='fullscreen-button'
+					src={fullscreenSVG}
+					onClick={() => { document.exitFullscreen().catch(() => { document.getElementById('container').requestFullscreen() }) }}
+				/>
+
 			</>
 
 
