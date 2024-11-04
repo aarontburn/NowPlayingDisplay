@@ -74,6 +74,8 @@ export class Spotify {
 
             log("Successfully authenticated with Spotify");
             log(`Token refresh occurs at ${new Date(this.token.expires)}`);
+            log(`Original Token:`)
+            console.log(this.token)
 
             this.refreshInterval = setInterval(this.refreshToken.bind(this), (this.token.expires_in * 1000) - REFRESH_OFFSET_MS);
 
@@ -176,7 +178,7 @@ export class Spotify {
 
         log("Refreshing token...");
         log("Old Token:");
-        log(this.token)
+        console.log(this.token)
 
 
         const url: string = "https://accounts.spotify.com/api/token";
@@ -195,19 +197,22 @@ export class Spotify {
         const body: Response = await fetch(url, payload);
         const response: any = (await body.json());
         log("New Token:");
-        log(response);
+        console.log(response);
 
         if (response.error !== undefined || response.expires === undefined) {
             this.cleanup();
             this.build();
             return;
         }
-        log(`Token refresh occurs at ${new Date(response.expires).toLocaleTimeString()}`)
+        log(`Token refresh occurs at ${new Date(response.expires).toLocaleTimeString()}`);
         // Note: refresh token might not have this field. check for it
 
         this.token = response;
         this.currentlyRefreshing = false;
     }
+    
+    private calculateRefreshTime(token) {
 
+    }
 
 }
