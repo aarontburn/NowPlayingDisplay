@@ -39,7 +39,7 @@ export class Spotify {
     private sdk: SpotifyApi;
     private token: AccessToken
     private currentlyRefreshing: boolean = false;
-    private refreshInterval: NodeJS.Timer;
+    private refreshTimeout: NodeJS.Timer;
 
 
     private static instance: Spotify;
@@ -55,13 +55,14 @@ export class Spotify {
 
     private constructor() {
         this.build();
+
     }
 
     private async cleanup() {
         log("Cleaning Spotify Instance.")
         this.token = undefined;
         this.sdk = undefined;
-        clearInterval(this.refreshInterval);
+        clearInterval(this.refreshTimeout);
     }
 
     private async build() {
@@ -73,11 +74,12 @@ export class Spotify {
             this.sdk = SpotifyApi.withAccessToken(i, this.token);
 
             log("Successfully authenticated with Spotify");
-            log(`Token refresh occurs at ${new Date(this.token.expires)}`);
-            log(`Original Token:`)
-            console.log(this.token)
+            log(`Token refresh occurs at ${new Date(this.token.expires).toLocaleTimeString()}, or in ${this.calculateRefreshTime(this.token) / 1000} seconds`);
 
-            this.refreshInterval = setInterval(this.refreshToken.bind(this), (this.token.expires_in * 1000) - REFRESH_OFFSET_MS);
+            log(`Original Token:`);
+            console.log(this.token);
+
+            this.setRefreshTimeout();
 
         } catch (err) {
             log(err);
@@ -200,19 +202,49 @@ export class Spotify {
         console.log(response);
 
         if (response.error !== undefined || response.expires === undefined) {
-            this.cleanup();
-            this.build();
+            this.rebuild();
             return;
         }
-        log(`Token refresh occurs at ${new Date(response.expires).toLocaleTimeString()}`);
+        this.token = response;
+
+
+        log(`Token refresh occurs at ${new Date(this.token.expires).toLocaleTimeString()}, or in ${this.calculateRefreshTime(this.token) / 1000} seconds`);
         // Note: refresh token might not have this field. check for it
 
-        this.token = response;
+        if (!this.setRefreshTimeout()) {
+            log("Could not calculate refresh time. Rebuilding...")
+            this.rebuild();
+            return;
+        }
+
         this.currentlyRefreshing = false;
     }
-    
-    private calculateRefreshTime(token) {
 
+    private setRefreshTimeout(): boolean {
+        clearTimeout(this.refreshTimeout);
+        const refreshTime: number = this.calculateRefreshTime(this.token);
+        if (refreshTime < 0) {
+            return false;
+        }
+
+        this.refreshTimeout = setTimeout(this.refreshToken.bind(this), refreshTime - REFRESH_OFFSET_MS);
+        return true;
+    }
+
+    private rebuild(): void {
+        this.cleanup();
+        this.build();
+    }
+    
+    private calculateRefreshTime(token: AccessToken): number {
+        const currentMS: number = new Date().getTime();
+        const tokenExpires: number | undefined = token.expires;
+
+        if (tokenExpires === undefined) {
+            return -1;
+        }
+
+        return tokenExpires - currentMS;
     }
 
 }
