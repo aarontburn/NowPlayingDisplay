@@ -227,7 +227,7 @@ export class Spotify {
             return false;
         }
 
-        this.refreshTimeout = setTimeout(this.refreshToken.bind(this), refreshTime - REFRESH_OFFSET_MS);
+        this.refreshTimeout = setTimeout(this.refreshToken.bind(this), refreshTime);
         return true;
     }
 
@@ -244,7 +244,9 @@ export class Spotify {
             return -1;
         }
 
-        return tokenExpires - currentMS;
+        const time: number = tokenExpires - currentMS;
+
+        return time > REFRESH_OFFSET_MS ? time - REFRESH_OFFSET_MS : time;
     }
 
 }
