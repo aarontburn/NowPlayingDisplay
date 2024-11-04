@@ -79,7 +79,7 @@ export class Spotify {
             log(`Original Token:`);
             console.log(this.token);
 
-            setTimeout(async () => {
+            setInterval(async () => {
                 log(`Token:`)
                 console.log(await this.sdk.getAccessToken())
             }, 60000)
