@@ -1,4 +1,4 @@
-import { AccessToken, Image, SpotifyApi, Track } from '@spotify/web-api-ts-sdk';
+import { AccessToken, Image, PlaybackState, SpotifyApi, Track } from '@spotify/web-api-ts-sdk';
 import { log } from './Global';
 
 
@@ -18,7 +18,9 @@ export interface CurrentSong {
     songPosition: number,
     isPlaying: boolean
     songId: string,
-    songURL: string
+    songURL: string,
+    sourcePlaybackState?: PlaybackState
+
 }
 
 const noImage: Image = { url: '', width: -1, height: -1 }
@@ -89,10 +91,13 @@ export class Spotify {
         // Wait until the authentication finished.
         await this.sdk.getAccessToken();
 
-        const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack().catch(err => {
+        let currentTrack: PlaybackState = undefined;
+        try {
+            currentTrack = await this.sdk.player.getCurrentlyPlayingTrack();
+        } catch (err) {
             log("Error when attempting to get current track:");
             console.log(err);
-        });
+        }
 
         if (!currentTrack) {
             return { ...defaultNoSong };
@@ -110,6 +115,7 @@ export class Spotify {
             isPlaying: currentTrack.is_playing,
             songId: song.id,
             songURL: song.external_urls.spotify,
+            sourcePlaybackState: currentTrack
         }
     }
 

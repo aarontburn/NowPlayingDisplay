@@ -3,6 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import { defaultNoSong, Spotify } from './Spotify';
 import { useCallback, useEffect, useState } from 'react';
 import infoSVG from './assets/info.svg';
+import { Track } from '@spotify/web-api-ts-sdk';
 
 const POLL_INTERVAL_MS: number = 1000;
 const HIDE_CONTROLS_AFTER_MS: number = 2000;
@@ -27,6 +28,9 @@ const SVGControl = ({ id = '', src, onClick }: { id?: string, src: string, onCli
 	>
 	</img>
 }
+
+const ExternalLink = ({ url, displayText = url, style }: { url: string, displayText: string, style?: React.CSSProperties }) =>
+	<a href={url} target='_blank' rel="noreferrer" style={{ ...style }}>{displayText}</a>
 
 
 const Home = () => {
@@ -85,6 +89,11 @@ const Home = () => {
 			<>
 				<div id='credits'>
 					<div style={{ marginTop: '5rem', marginLeft: '5rem' }}>
+						<p><span style={{ marginRight: "1em" }}>Artists:</span> {
+							(currentTrack.sourcePlaybackState?.item as Track).artists
+								.map(a => <a style={{ marginRight: '1em' }} href={a.external_urls.spotify} target='_blank' rel="noreferrer">{a.name}</a>)
+							?? ''
+						}</p>
 						<p>External Link: <a href={currentTrack.songURL} target='_blank' rel="noreferrer" >{currentTrack.songURL}</a></p>
 					</div>
 				</div>
