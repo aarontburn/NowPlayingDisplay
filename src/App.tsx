@@ -66,9 +66,9 @@ const Home = () => {
 		if (controlTimeout !== undefined) {
 			clearTimeout(controlTimeout);
 		}
-		root.style.setProperty("cursor", 'unset');
+		// root.style.setProperty("cursor", 'unset');
 		setControlTimeout(setTimeout(() => {
-			root.style.setProperty("cursor", 'none');
+			// root.style.setProperty("cursor", 'none');
 			setShowControls(false);
 		}, HIDE_CONTROLS_AFTER_MS))
 	}, [controlTimeout]);
