@@ -79,10 +79,9 @@ export class Spotify {
             log(`Original Token:`);
             console.log(this.token);
 
-            setInterval(async () => {
-                log(`Token:`)
-                console.log(await this.sdk.getAccessToken())
-            }, 60000)
+            // setInterval(async () => {
+            //     console.log(JSON.stringify(await this.sdk.getAccessToken(), undefined, 4))
+            // }, 60000)
 
             // this.setRefreshTimeout();
 
@@ -100,6 +99,7 @@ export class Spotify {
         if (!this.sdk || this.currentlyRefreshing) {
             return { ...defaultNoSong };
         }
+        console.log(JSON.stringify(await this.sdk.getAccessToken(), undefined, 4))
         const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack().catch(err => {
             log(err)
             if ((err.description as string)?.includes('refresh_token')) {
