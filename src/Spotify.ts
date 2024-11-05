@@ -91,7 +91,8 @@ export class Spotify {
         if (this.currentlyRefreshing) {
             return { ...defaultNoSong };
         }
-        console.log(JSON.stringify(await this.sdk.getAccessToken(), undefined, 4))
+        const token = await this.sdk.getAccessToken();
+        console.log(JSON.stringify({ ...token, time: new Date(token.expires).toLocaleString()}, undefined, 4))
         const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack().catch(err => {
             log("Error when attempting to get current track:")
             console.log(err)
