@@ -27,6 +27,8 @@ const SVGControl = ({ id = '', src, onClick }: { id?: string, src: string, onCli
 		src={src}
 		onClick={onClick}
 		alt=''
+		draggable={false}
+
 	>
 	</img>
 }
@@ -80,6 +82,7 @@ const Home = () => {
 				id='album-art'
 				src={currentTrack.image.url}
 				alt='Background album art display.'
+				draggable={false}
 			>
 			</img>
 
@@ -89,8 +92,12 @@ const Home = () => {
 			showCredits &&
 			<>
 				<div id='credits'>
-					
-					
+					<div style={{ marginTop: '5rem', marginLeft: '5rem' }}>
+						<p>External Link: <a href={currentTrack.songURL} target='_blank'>{currentTrack.songURL}</a></p>
+
+
+					</div>
+
 
 				</div>
 			</>
@@ -147,6 +154,8 @@ const Home = () => {
 						src={currentTrack.image.url}
 						alt='Small album art display.'
 						style={{ height: '100%' }}
+						draggable={false}
+
 					>
 					</img>
 				}

@@ -17,7 +17,8 @@ export interface CurrentSong {
     songLength: number,
     songPosition: number,
     isPlaying: boolean
-    songId: string
+    songId: string,
+    songURL: string
 }
 
 const noImage: Image = { url: '', width: -1, height: -1 }
@@ -30,14 +31,14 @@ export const defaultNoSong: CurrentSong = {
     songLength: -1,
     songPosition: -1,
     isPlaying: false,
-    songId: ''
+    songId: '',
+    songURL: ''
 }
 
 
 export class Spotify {
 
     private sdk: SpotifyApi;
-    private currentlyRefreshing: boolean = false;
     private refreshTimeout: NodeJS.Timer;
 
 
@@ -88,11 +89,11 @@ export class Spotify {
 
 
     public async getCurrentTrack(): Promise<CurrentSong> {
-        if (this.currentlyRefreshing) {
-            return { ...defaultNoSong };
-        }
-        const token = await this.sdk.getAccessToken();
-        console.log(JSON.stringify({ ...token, time: new Date(token.expires).toLocaleString()}, undefined, 4))
+        // If there is issues with timing/calling this function during the refresh time, uncomment this line.
+        // const token = await this.sdk.getAccessToken();
+        // console.log(JSON.stringify({ ...token, time: new Date(token.expires).toLocaleString()}, undefined, 4))
+
+
         const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack().catch(err => {
             log("Error when attempting to get current track:")
             console.log(err)
@@ -111,7 +112,8 @@ export class Spotify {
             songLength: song.duration_ms,
             songPosition: currentTrack.progress_ms,
             isPlaying: currentTrack.is_playing,
-            songId: song.id
+            songId: song.id,
+            songURL: song.external_urls.spotify,
         }
     }
 
