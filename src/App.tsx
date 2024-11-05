@@ -2,11 +2,6 @@ import './App.css';
 import { Route, Routes } from "react-router-dom";
 import { defaultNoSong, Spotify } from './Spotify';
 import { useCallback, useEffect, useState } from 'react';
-import fullscreenSVG from './assets/fullscreen.svg';
-import pauseSVG from './assets/pause.svg';
-import playSVG from './assets/play.svg';
-import rewindSVG from './assets/rewind.svg';
-import skipSVG from './assets/skip.svg';
 import infoSVG from './assets/info.svg';
 
 const POLL_INTERVAL_MS: number = 1000;
@@ -33,8 +28,6 @@ const SVGControl = ({ id = '', src, onClick }: { id?: string, src: string, onCli
 	</img>
 }
 
-const Spacer = ({ spacing = 'auto' }: { spacing: string }) => <div style={{ marginRight: spacing }}></div>
-
 
 const Home = () => {
 	const [spotify] = useState(() => Spotify.getInstance());
@@ -46,12 +39,7 @@ const Home = () => {
 		}
 	}), [spotify]);
 
-	const [showControls, setShowControls] = useState(false);
-	const [controlTimeout, setControlTimeout] = useState(undefined as NodeJS.Timeout);
 	const [showCredits, setShowCredits] = useState(false);
-
-
-
 
 	useEffect(() => {
 		getTrack();
@@ -59,22 +47,28 @@ const Home = () => {
 		return () => clearInterval(interval);
 	}, [spotify, getTrack]);
 
-	const onMouseDown = useCallback(() => {
-		const root: HTMLElement = document.querySelector(':root') as HTMLElement;
-		setShowControls(true);
+	const [showControls, setShowControls] = useState(false);
+	const [controlTimeout, setControlTimeout] = useState(undefined as NodeJS.Timeout);
 
-		if (controlTimeout !== undefined) {
+	const onMouseMove = useCallback(() => {
+		const root: HTMLElement = document.querySelector(':root') as HTMLElement;
+
+		if (controlTimeout) {
 			clearTimeout(controlTimeout);
 		}
-		// root.style.setProperty("cursor", 'unset');
-		setControlTimeout(setTimeout(() => {
-			// root.style.setProperty("cursor", 'none');
-			setShowControls(false);
-		}, HIDE_CONTROLS_AFTER_MS))
+		root.style.cursor = 'unset';
+		setShowControls(true);
+
+		setControlTimeout(
+			setTimeout(() => {
+				setControlTimeout(null);
+				root.style.cursor = 'none';
+				setShowControls(false);
+			}, HIDE_CONTROLS_AFTER_MS));
 	}, [controlTimeout]);
 
 
-	return <div id='container' onMouseDown={onMouseDown}>
+	return <div id='container' onMouseMove={onMouseMove}>
 		{
 			currentTrack.image.url !== '' &&
 			<img
@@ -84,7 +78,6 @@ const Home = () => {
 				draggable={false}
 			>
 			</img>
-
 		}
 
 		{
@@ -92,16 +85,11 @@ const Home = () => {
 			<>
 				<div id='credits'>
 					<div style={{ marginTop: '5rem', marginLeft: '5rem' }}>
-						<p>External Link: <a href={currentTrack.songURL} target='_blank'>{currentTrack.songURL}</a></p>
-
-
+						<p>External Link: <a href={currentTrack.songURL} target='_blank' rel="noreferrer" >{currentTrack.songURL}</a></p>
 					</div>
-
-
 				</div>
 			</>
 		}
-
 
 
 		{
@@ -113,30 +101,6 @@ const Home = () => {
 					src={infoSVG}
 					onClick={() => setShowCredits((old) => !old)}
 				/>
-
-
-				{/* <div id='controls'>
-					<div style={{ display: 'flex', alignItems: 'center' }}>
-						<SVGControl
-							src={rewindSVG}
-							onClick={() => spotify && spotify.rewind().then(() => getTrack())} />
-
-						<Spacer spacing='1em' />
-						<SVGControl
-							src={currentTrack.isPlaying ? pauseSVG : playSVG}
-							onClick={() => spotify && spotify.togglePlay()} />
-						<Spacer spacing='1em' />
-						<SVGControl
-							src={skipSVG}
-							onClick={() => spotify && spotify.skip().then(() => getTrack())} />
-					</div>
-				</div>
-				<SVGControl
-					id='fullscreen-button'
-					src={fullscreenSVG}
-					onClick={() => { document.exitFullscreen().catch(() => { document.getElementById('container').requestFullscreen() }) }}
-				/> */}
-
 			</>
 
 
@@ -172,16 +136,6 @@ const Home = () => {
 		</div>
 
 	</div>
-}
-
-const msToTime = (ms: number): string => {
-	if (ms === -1) {
-		return '0:00';
-	}
-
-	const minutes: number = Math.floor(ms / 1000 / 60);
-	const seconds: number = Math.floor((ms / 1000) - (60 * minutes));
-	return `${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`;
 }
 
 

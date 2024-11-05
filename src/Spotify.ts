@@ -3,9 +3,9 @@ import { log } from './Global';
 
 
 
-const i: string = 'dd3af8424e834918ae856cf21023fc5b'
-const re: string = 'http://localhost:3000/'
-const SCOPE: string[] = ['user-read-currently-playing', 'user-read-playback-state', 'user-modify-playback-state'];
+const i: string = 'dd3af8424e834918ae856cf21023fc5b';
+const re: string = 'http://localhost:3000/';
+const SCOPE: string[] = ['user-read-currently-playing'];
 const PAGE_REFRESH_ERR: string = `No verifier found in cache - can't validate query string callback parameters.`;
 const REFRESH_OFFSET_MS: number = 10000;
 
@@ -49,7 +49,6 @@ export class Spotify {
     }
 
 
-
     private constructor() {
         this.build();
     }
@@ -81,15 +80,18 @@ export class Spotify {
 
 
     public async getCurrentTrack(): Promise<CurrentSong> {
-        // If there is issues with timing/calling this function during the refresh time, uncomment this line.
-        // const token = await this.sdk.getAccessToken();
-        // console.log(JSON.stringify({ ...token, time: new Date(token.expires).toLocaleString()}, undefined, 4))
+        if (!this.sdk) {
+            return { ...defaultNoSong };
+        }
 
+        // Wait until the authentication finished.
+        await this.sdk.getAccessToken();
 
         const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack().catch(err => {
-            log("Error when attempting to get current track:")
-            console.log(err)
+            log("Error when attempting to get current track:");
+            console.log(err);
         });
+        
         if (!currentTrack) {
             return { ...defaultNoSong };
         }
@@ -109,31 +111,6 @@ export class Spotify {
         }
     }
 
-    public async togglePlay() {
-        const currentState = await this.sdk.player.getPlaybackState();
-        if (!currentState || !currentState.is_playing) {
-            await this.play();
-            return;
-        }
-
-        await this.pause();
-    }
-
-    public async play() {
-        await this.sdk.player.startResumePlayback(undefined).catch(_ => { });
-    }
-
-    public async pause() {
-        await this.sdk.player.pausePlayback(undefined).catch(_ => { });
-    }
-
-    public async skip() {
-        await this.sdk.player.skipToNext(undefined).catch(_ => { });
-    }
-
-    public async rewind() {
-        await this.sdk.player.skipToPrevious(undefined).catch(_ => { });
-    }
 
 
     private calculateRefreshTime(token: AccessToken): number {
