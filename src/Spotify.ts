@@ -37,16 +37,18 @@ export const defaultNoSong: CurrentSong = {
 
 
 export class Spotify {
+    
 
-    private sdk: SpotifyApi;
     private static instance: Spotify;
-
     public static getInstance(): Spotify {
         if (!this.instance) {
             this.instance = new Spotify()
         }
         return this.instance;
     }
+
+    private sdk: SpotifyApi;
+
 
 
     private constructor() {
@@ -91,7 +93,7 @@ export class Spotify {
             log("Error when attempting to get current track:");
             console.log(err);
         });
-        
+
         if (!currentTrack) {
             return { ...defaultNoSong };
         }
