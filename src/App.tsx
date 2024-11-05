@@ -46,7 +46,7 @@ const Home = () => {
 		}
 	}), [spotify]);
 
-	const [showControls, setControlsHidden] = useState(false);
+	const [showControls, setShowControls] = useState(false);
 	const [controlTimeout, setControlTimeout] = useState(undefined as NodeJS.Timeout);
 	const [showCredits, setShowCredits] = useState(false);
 
@@ -61,16 +61,15 @@ const Home = () => {
 
 	const onMouseDown = useCallback(() => {
 		const root: HTMLElement = document.querySelector(':root') as HTMLElement;
-		setControlsHidden(true);
+		setShowControls(true);
 
 		if (controlTimeout !== undefined) {
 			clearTimeout(controlTimeout);
 		}
 		root.style.setProperty("cursor", 'unset');
-
 		setControlTimeout(setTimeout(() => {
 			root.style.setProperty("cursor", 'none');
-			setControlsHidden(false);
+			setShowControls(false);
 		}, HIDE_CONTROLS_AFTER_MS))
 	}, [controlTimeout]);
 
@@ -116,7 +115,7 @@ const Home = () => {
 				/>
 
 
-				<div id='controls'>
+				{/* <div id='controls'>
 					<div style={{ display: 'flex', alignItems: 'center' }}>
 						<SVGControl
 							src={rewindSVG}
@@ -136,7 +135,7 @@ const Home = () => {
 					id='fullscreen-button'
 					src={fullscreenSVG}
 					onClick={() => { document.exitFullscreen().catch(() => { document.getElementById('container').requestFullscreen() }) }}
-				/>
+				/> */}
 
 			</>
 

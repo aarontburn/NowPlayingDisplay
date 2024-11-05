@@ -39,9 +39,6 @@ export const defaultNoSong: CurrentSong = {
 export class Spotify {
 
     private sdk: SpotifyApi;
-    private refreshTimeout: NodeJS.Timer;
-
-
     private static instance: Spotify;
 
     public static getInstance(): Spotify {
@@ -57,11 +54,6 @@ export class Spotify {
         this.build();
     }
 
-    private async cleanup() {
-        log("Cleaning Spotify Instance.")
-        this.sdk = undefined;
-        clearInterval(this.refreshTimeout);
-    }
 
     private async build() {
         log("Creating a new instance of Spotify.");
