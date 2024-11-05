@@ -37,7 +37,6 @@ export const defaultNoSong: CurrentSong = {
 export class Spotify {
 
     private sdk: SpotifyApi;
-    private token: AccessToken
     private currentlyRefreshing: boolean = false;
     private refreshTimeout: NodeJS.Timer;
 
@@ -55,12 +54,10 @@ export class Spotify {
 
     private constructor() {
         this.build();
-
     }
 
     private async cleanup() {
         log("Cleaning Spotify Instance.")
-        this.token = undefined;
         this.sdk = undefined;
         clearInterval(this.refreshTimeout);
     }
@@ -69,21 +66,16 @@ export class Spotify {
         log("Creating a new instance of Spotify.");
 
         try {
-            
-            this.token = (await SpotifyApi.performUserAuthorization(i, re, SCOPE, async (_) => { })).accessToken;
-            this.sdk = SpotifyApi.withAccessToken(i, this.token);
+
+            const token: AccessToken = (await SpotifyApi.performUserAuthorization(i, re, SCOPE, async (_) => { })).accessToken;
+            this.sdk = SpotifyApi.withAccessToken(i, token);
 
             log("Successfully authenticated with Spotify");
-            log(`Token refresh occurs at ${new Date(this.token.expires).toLocaleTimeString()}, or in ${this.calculateRefreshTime(this.token) / 1000} seconds`);
+            log(`Token refresh occurs at ${new Date(token.expires).toLocaleTimeString()}, or in ${this.calculateRefreshTime(token) / 1000} seconds`);
 
             log(`Original Token:`);
-            console.log(this.token);
+            console.log(token);
 
-            // setInterval(async () => {
-            //     console.log(JSON.stringify(await this.sdk.getAccessToken(), undefined, 4))
-            // }, 60000)
-
-            // this.setRefreshTimeout();
 
         } catch (err) {
             log(err);
@@ -96,15 +88,13 @@ export class Spotify {
 
 
     public async getCurrentTrack(): Promise<CurrentSong> {
-        if (!this.sdk || this.currentlyRefreshing) {
+        if (this.currentlyRefreshing) {
             return { ...defaultNoSong };
         }
         console.log(JSON.stringify(await this.sdk.getAccessToken(), undefined, 4))
         const currentTrack = await this.sdk.player.getCurrentlyPlayingTrack().catch(err => {
-            log(err)
-            if ((err.description as string)?.includes('refresh_token')) {
-                this.refreshToken();
-            }
+            log("Error when attempting to get current track:")
+            console.log(err)
         });
         if (!currentTrack) {
             return { ...defaultNoSong };
@@ -125,10 +115,6 @@ export class Spotify {
     }
 
     public async togglePlay() {
-        if (!this.sdk) {
-            return;
-        }
-
         const currentState = await this.sdk.player.getPlaybackState();
         if (!currentState || !currentState.is_playing) {
             await this.play();
@@ -139,110 +125,22 @@ export class Spotify {
     }
 
     public async play() {
-        if (!this.sdk) {
-            return;
-        }
         await this.sdk.player.startResumePlayback(undefined).catch(_ => { });
     }
 
     public async pause() {
-        if (!this.sdk) {
-            return;
-        }
         await this.sdk.player.pausePlayback(undefined).catch(_ => { });
     }
 
-    public async setVolume(volumePercent: number) {
-        if (volumePercent < 0) {
-            volumePercent = 0;
-        }
-        if (volumePercent > 100) {
-            volumePercent = 100;
-        }
-
-        await this.sdk.player.setPlaybackVolume(volumePercent);
-    }
-
     public async skip() {
-        if (!this.sdk) {
-            return;
-        }
         await this.sdk.player.skipToNext(undefined).catch(_ => { });
     }
 
     public async rewind() {
-        if (!this.sdk) {
-            return;
-        }
         await this.sdk.player.skipToPrevious(undefined).catch(_ => { });
     }
 
-    public async refreshToken() {
-        if (this.currentlyRefreshing) {
-            return;
-        }
-        this.currentlyRefreshing = true;
 
-        log("Refreshing token...");
-        log("Old Token:");
-        console.log(this.token)
-
-
-        const url: string = "https://accounts.spotify.com/api/token";
-
-        const payload: RequestInit = {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: new URLSearchParams({
-                grant_type: 'refresh_token',
-                refresh_token: this.token.refresh_token,
-                client_id: i
-            }),
-        }
-        const body: Response = await fetch(url, payload);
-        const response: any = (await body.json());
-        log("New Token:");
-        console.log(response);
-
-        if (response.error !== undefined || response.expires === undefined) {
-            this.rebuild();
-            this.currentlyRefreshing = false;
-            return;
-        }
-        this.token = response;
-
-
-        log(`Token refresh occurs at ${new Date(this.token.expires).toLocaleTimeString()}, or in ${this.calculateRefreshTime(this.token) / 1000} seconds`);
-        // Note: refresh token might not have this field. check for it
-
-        if (!this.setRefreshTimeout()) {
-            log("Could not calculate refresh time. Rebuilding...")
-            this.rebuild();
-            this.currentlyRefreshing = false;
-            return;
-        }
-
-        this.currentlyRefreshing = false;
-    }
-
-    private setRefreshTimeout(): boolean {
-        clearTimeout(this.refreshTimeout);
-        const refreshTime: number = this.calculateRefreshTime(this.token);
-        if (refreshTime < 0) {
-            return false;
-        }
-
-        this.refreshTimeout = setTimeout(this.refreshToken.bind(this), refreshTime);
-        return true;
-    }
-
-    private rebuild(): void {
-        this.cleanup();
-        this.build();
-    }
-    
     private calculateRefreshTime(token: AccessToken): number {
         const currentMS: number = new Date().getTime();
         const tokenExpires: number | undefined = token.expires;
