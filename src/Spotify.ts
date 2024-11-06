@@ -88,7 +88,7 @@ export class Spotify {
      *  The scope(s) of what info is read from the user. Currently, this only
      *      uses a single scope to read playback state.
      */
-    private static SCOPE: readonly string[] = ['user-read-playback-state', 'user-read-recently-played'];
+    private static SCOPE: readonly string[] = ['user-read-playback-state'];
 
     /**
      *  The redirect URL. Note that if this changes, it must be changed in the
