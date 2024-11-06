@@ -67,7 +67,7 @@ export class Spotify {
      *  @see instance
      */
     public static getInstance(): Spotify {
-        return !this.instance ? this.instance = new Spotify(): this.instance;
+        return this.instance ?? (this.instance = new Spotify());
     }
 
 
@@ -88,7 +88,7 @@ export class Spotify {
      *  The scope(s) of what info is read from the user. Currently, this only
      *      uses a single scope to read playback state.
      */
-    private static SCOPE: readonly string[] = ['user-read-playback-state'];
+    private static SCOPE: readonly string[] = ['user-read-playback-state', 'user-read-recently-played'];
 
     /**
      *  The redirect URL. Note that if this changes, it must be changed in the
@@ -114,6 +114,7 @@ export class Spotify {
 
             log("Successfully authenticated with Spotify");
             log(`Token refresh occurs at ${new Date(token.expires).toLocaleTimeString()}, or in ${this.calculateRefreshTime(token) / 1000} seconds`);
+            log(JSON.stringify(token, undefined, 4))
 
         } catch (err) {
             console.log(err);
@@ -164,6 +165,8 @@ export class Spotify {
             return defaults.defaultNoTrack;
         }
 
+        // console.log(currentTrack.item.uri)
+
         // If the currently playing item is an episode, return the default object.
         if (currentTrack.currently_playing_type === 'episode') {
             // console.log(currentTrack)
@@ -199,5 +202,7 @@ export class Spotify {
 
         return tokenExpires - currentMS;
     }
+
+
 
 }

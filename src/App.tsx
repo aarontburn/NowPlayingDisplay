@@ -3,7 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import { CurrentTrack, defaults, Spotify } from './Spotify';
 import { ReactNode, useCallback, useEffect, useState } from 'react';
 import infoSVG from './assets/info.svg';
-import { Track } from '@spotify/web-api-ts-sdk';
+import { SimplifiedArtist, Track } from '@spotify/web-api-ts-sdk';
 
 /**
  * 	How often to poll the current track.
@@ -35,34 +35,26 @@ const SVGControl = ({ id = '', src, onClick }: { id?: string, src: string, onCli
 }
 
 const CreditsSection = ({ sectionTitle, children }: { sectionTitle: string, children?: ReactNode }) => {
-	return <p style={{ marginBottom: '1rem' }}><span style={{ marginRight: '1rem', fontSize: '2rem' }}>{sectionTitle}</span> {children}</p>
+	return <p style={{ marginBottom: '1rem' }}><span style={{ fontSize: '1.5rem' }}>{sectionTitle} </span> {children}</p>
 }
 
 const ExternalLink = ({ url, displayText = url, style }: { url: string, displayText: string, style?: React.CSSProperties }) =>
-	<a href={url} target='_blank' rel="noreferrer" style={{ ...style, fontSize: '2em' }}>{displayText}</a>
+	<a href={url} target='_blank' rel="noreferrer" style={{ fontSize: '1.5em', ...style }}>{displayText}</a>
 
+const VerticalSpacer = ({ size }: { size: string }) => <div style={{ marginBottom: size }}></div>
 
 const Credits = ({ currentTrack }: { currentTrack: CurrentTrack }) => {
 	return <>
 		<div id='credits'>
-			<div style={{ marginTop: '5rem', marginLeft: '5rem', marginRight: '5rem' }}>
+			<div style={{ margin: '5rem', height: '100%', maxHeight: '352px' }}>
+				<iframe style={{ borderRadius: "12px", }}
+					src={`https://open.spotify.com/embed/track/${(currentTrack.sourcePlaybackState.item as Track).id}?utm_source=generator`}
+					width="100%"
+					height='352px'
+					allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy">
 
-				<CreditsSection sectionTitle='Song:'>
-					<ExternalLink url={currentTrack.trackUrl} displayText={currentTrack.trackName} />
-				</CreditsSection>
+				</iframe>
 
-				<CreditsSection sectionTitle='Album:'>
-					<ExternalLink url={(currentTrack.sourcePlaybackState.item as Track).album.external_urls.spotify} displayText={currentTrack.albumName} />
-				</CreditsSection>
-
-				<CreditsSection sectionTitle='Artists:'>
-					{
-						(currentTrack.sourcePlaybackState?.item as Track).artists
-							.map((artist, index) =>
-								<ExternalLink key={index} style={{ marginRight: '1em' }} url={artist.external_urls.spotify} displayText={artist.name} />)
-						?? ''
-					}
-				</CreditsSection>
 			</div>
 		</div>
 	</>
