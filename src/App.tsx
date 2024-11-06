@@ -59,10 +59,13 @@ const Credits = ({ currentTrack }: { currentTrack: CurrentTrack }) => {
 		</div>
 	</>
 }
-
+function isTouchDevice() {
+	return window.ontouchstart !== undefined
+  }
 
 
 export const Home = () => {
+	console.log(isTouchDevice())
 	const [spotify] = useState(() => Spotify.getInstance());
 
 	const [currentTrack, setCurrentTrack] = useState(defaults.defaultNoTrack);
