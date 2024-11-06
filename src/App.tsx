@@ -54,7 +54,7 @@ const Credits = ({ currentTrack }: { currentTrack: CurrentTrack }) => {
 				<CreditsSection sectionTitle='Album:'>
 					<ExternalLink url={(currentTrack.sourcePlaybackState.item as Track).album.external_urls.spotify} displayText={currentTrack.albumName} />
 				</CreditsSection>
-				
+
 				<CreditsSection sectionTitle='Artists:'>
 					{
 						(currentTrack.sourcePlaybackState?.item as Track).artists
@@ -94,7 +94,8 @@ export const Home = () => {
 
 	// Show mouse when moving, and hide mouse after 5 seconds of not moving it.
 	const [mouseTimeout, setMouseTimeout] = useState(undefined as NodeJS.Timeout);
-	const onMouseMove = useCallback(() => {
+	const onMouseMove = useCallback((event) => {
+		console.log(event)
 		if (mouseTimeout) {
 			clearTimeout(mouseTimeout);
 		}
@@ -109,7 +110,7 @@ export const Home = () => {
 	// Show control panel when mouse is clicked, and hide after 5 seconds
 	const [showControls, setShowControls] = useState(false);
 	const [controlTimeout, setControlTimeout] = useState(undefined as NodeJS.Timeout);
-	const onMouseDown = useCallback(() => {
+	const onMouseDown = useCallback((event) => {
 		if (controlTimeout) {
 			clearTimeout(controlTimeout);
 		}
