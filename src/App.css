@@ -3,6 +3,12 @@
     cursor: none;
 }
 
+a {
+    color: skyblue;
+    /* text-decoration: none; */
+}
+
+
 
 
 @font-face {

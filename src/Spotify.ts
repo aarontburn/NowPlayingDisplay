@@ -2,79 +2,125 @@ import { AccessToken, Image, PlaybackState, SpotifyApi, Track } from '@spotify/w
 import { log } from './Global';
 
 
-
-const i: string = 'dd3af8424e834918ae856cf21023fc5b';
-const re: string = 'http://localhost:3000/';
-const SCOPE: string[] = ['user-read-currently-playing'];
+/**
+ *  Page refresh error. This error is thrown after the user authorizes this application.
+ *  @see getCurrentlyPlayingTrack
+ */
 const PAGE_REFRESH_ERR: string = `No verifier found in cache - can't validate query string callback parameters.`;
-const REFRESH_OFFSET_MS: number = 10000;
 
-export interface CurrentSong {
+/**
+ *  Relevant Information about the currently playing track.
+ */
+export interface CurrentTrack {
     albumName: string,
-    songName: string,
+    trackName: string,
     artists: string[],
     image: Image,
-    songLength: number,
-    songPosition: number,
+    trackLength: number,
+    trackPosition: number,
     isPlaying: boolean
-    songId: string,
-    songURL: string,
+    trackId: string,
+    trackUrl: string,
     sourcePlaybackState?: PlaybackState
-
 }
 
-const noImage: Image = { url: '', width: -1, height: -1 }
-
-export const defaultNoSong: CurrentSong = {
-    albumName: ' ',
-    songName: 'No Song Playing',
-    artists: [' '],
-    image: { url: '', width: -1, height: -1 },
-    songLength: -1,
-    songPosition: -1,
-    isPlaying: false,
-    songId: '',
-    songURL: ''
-}
-
-
-export class Spotify {
-    
-
-    private static instance: Spotify;
-    public static getInstance(): Spotify {
-        if (!this.instance) {
-            this.instance = new Spotify()
+/**
+ *  Object containing getters for default objects. Returns copies of the objects.
+ */
+export const defaults: { readonly defaultNoImage: Image, readonly defaultNoTrack: CurrentTrack } = {
+    get defaultNoImage(): Image {
+        return { ...{ url: '', width: -1, height: -1 } }
+    },
+    get defaultNoTrack(): CurrentTrack {
+        return {
+            ...{
+                albumName: ' ',
+                trackName: 'No Song Playing',
+                artists: [' '],
+                image: defaults.defaultNoImage,
+                trackLength: -1,
+                trackPosition: -1,
+                isPlaying: false,
+                trackId: '',
+                trackUrl: ''
+            }
         }
-        return this.instance;
+    }
+}
+
+
+/**
+ *  Class encapsulating all used Spotify behavior.
+ */
+export class Spotify {
+
+    /**
+     *  Singleton instance. For some reason, if not using a singleton, two classes would be made.
+     *  Probably my fault.
+     *  @see getInstance
+     */
+    private static instance: Spotify;
+
+    /**
+     *  Lazy singleton accessor.
+     *  @returns The instance.
+     *  @see instance
+     */
+    public static getInstance(): Spotify {
+        return !this.instance ? this.instance = new Spotify(): this.instance;
     }
 
-    private sdk: SpotifyApi;
 
-
-
+    /**
+     *  Private constructor. Should not be called anywhere outside of the lazy singleton accessor.
+     *  @see getInstance
+     */
     private constructor() {
         this.build();
     }
 
+    /**
+     *  The application ID.
+     */
+    private static CLIENT_ID: string = 'dd3af8424e834918ae856cf21023fc5b';
 
-    private async build() {
+    /**
+     *  The scope(s) of what info is read from the user. Currently, this only
+     *      uses a single scope to read playback state.
+     */
+    private static SCOPE: readonly string[] = ['user-read-playback-state'];
+
+    /**
+     *  The redirect URL. Note that if this changes, it must be changed in the
+     *      Spotify developer dashboard.
+     */
+    private static REDIRECT_URL: string = 'http://localhost:3000/';
+
+
+    /**
+     *  The Spotify SDK.
+     */
+    private sdk: SpotifyApi;
+
+    /**
+     *  The entry point.
+     */
+    private async build(): Promise<void> {
         log("Creating a new instance of Spotify.");
 
         try {
-
-            const token: AccessToken = (await SpotifyApi.performUserAuthorization(i, re, SCOPE, async (_) => { })).accessToken;
-            this.sdk = SpotifyApi.withAccessToken(i, token);
+            const token: AccessToken = (await SpotifyApi.performUserAuthorization(Spotify.CLIENT_ID, Spotify.REDIRECT_URL, [...Spotify.SCOPE], async (_) => { })).accessToken;
+            this.sdk = SpotifyApi.withAccessToken(Spotify.CLIENT_ID, token);
 
             log("Successfully authenticated with Spotify");
             log(`Token refresh occurs at ${new Date(token.expires).toLocaleTimeString()}, or in ${this.calculateRefreshTime(token) / 1000} seconds`);
 
-            log(`Original Token:`);
-            console.log(token);
-
-
         } catch (err) {
-            log(err);
+            console.log(err);
+
+            //  For some reason, an error after authentication and goes away after refreshing.
+            //  However, refreshing right away creates a refreshing loop, so we refresh
+            //      after 0.5 seconds. This could potentially be tweaked to be shorter. 
             if ((err as Error).message.includes(PAGE_REFRESH_ERR)) {
                 setTimeout(() => window.location.reload(), 500);
             }
@@ -83,38 +129,60 @@ export class Spotify {
     }
 
 
-    public async getCurrentTrack(): Promise<CurrentSong> {
+    /**
+     *  Retrieves the current track.
+     * 
+     *  If there is an error with retrieving the track, it will return a default object.
+     * 
+     *  Currently, the used SDK doesn't seem to support podcast episodes (although the 
+     *      API suggests otherwise). If the user is playing a podcast, it will return 
+     *      the default object instead.
+     *  @returns An object containing information about the current track.
+     *  @see CurrentTrack
+     *  @see defaults.defaultNoTrack
+     */
+    public async getCurrentTrack(): Promise<CurrentTrack> {
         if (!this.sdk) {
-            return { ...defaultNoSong };
+            return defaults.defaultNoTrack;
         }
 
-        // Wait until the authentication finished.
-        await this.sdk.getAccessToken();
+        //  Wait until the authentication finished.
+        //  If this function is called during the built-in token refresh process,
+        //      I THINK this halts this Promise until the process finishes.
+        const token = await this.sdk.getAccessToken();
+        // console.log(JSON.stringify(token, undefined, 4))
 
         let currentTrack: PlaybackState = undefined;
         try {
-            currentTrack = await this.sdk.player.getCurrentlyPlayingTrack();
+            currentTrack = await this.sdk.player.getPlaybackState();
         } catch (err) {
             log("Error when attempting to get current track:");
             console.log(err);
         }
 
         if (!currentTrack) {
-            return { ...defaultNoSong };
+            return defaults.defaultNoTrack;
         }
+
+        // If the currently playing item is an episode, return the default object.
+        if (currentTrack.currently_playing_type === 'episode') {
+            // console.log(currentTrack)
+            return defaults.defaultNoTrack;
+        }
+
 
         const song: Track = currentTrack.item as Track;
 
         return {
             albumName: song.album.name,
-            songName: song.name,
+            trackName: song.name,
             artists: song.artists.map(a => a.name),
-            image: song.album.images.length === 0 ? { ...noImage } : song.album.images[0],
-            songLength: song.duration_ms,
-            songPosition: currentTrack.progress_ms,
+            image: song.album.images.length === 0 ? defaults.defaultNoImage : song.album.images[0],
+            trackLength: song.duration_ms,
+            trackPosition: currentTrack.progress_ms,
             isPlaying: currentTrack.is_playing,
-            songId: song.id,
-            songURL: song.external_urls.spotify,
+            trackId: song.id,
+            trackUrl: song.external_urls.spotify,
             sourcePlaybackState: currentTrack
         }
     }
@@ -129,9 +197,7 @@ export class Spotify {
             return -1;
         }
 
-        const time: number = tokenExpires - currentMS;
-
-        return time > REFRESH_OFFSET_MS ? time - REFRESH_OFFSET_MS : time;
+        return tokenExpires - currentMS;
     }
 
 }
