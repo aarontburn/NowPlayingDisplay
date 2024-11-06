@@ -95,7 +95,10 @@ export const Home = () => {
 	// Show mouse when moving, and hide mouse after 5 seconds of not moving it.
 	const [mouseTimeout, setMouseTimeout] = useState(undefined as NodeJS.Timeout);
 	const onMouseMove = useCallback((event) => {
-		console.log(event)
+		if (event.movementX === 0 && event.movementY === 0) {
+			return;
+		}
+
 		if (mouseTimeout) {
 			clearTimeout(mouseTimeout);
 		}
