@@ -1,7 +1,7 @@
 import './App.css';
 import { Route, Routes } from "react-router-dom";
 import { CurrentTrack, defaults, Spotify } from './Spotify';
-import { ReactNode, useCallback, useEffect, useState } from 'react';
+import { ReactNode, useCallback, useEffect, useState, Fragment } from 'react';
 import infoSVG from './assets/info.svg';
 import { SimplifiedArtist, Track } from '@spotify/web-api-ts-sdk';
 
@@ -46,26 +46,34 @@ const VerticalSpacer = ({ size }: { size: string }) => <div style={{ marginBotto
 const Credits = ({ currentTrack }: { currentTrack: CurrentTrack }) => {
 	return <>
 		<div id='credits'>
-			<div style={{ margin: '5rem', height: '100%', maxHeight: '352px' }}>
-				<iframe style={{ borderRadius: "12px", }}
-					src={`https://open.spotify.com/embed/track/${(currentTrack.sourcePlaybackState.item as Track).id}?utm_source=generator`}
-					width="100%"
-					height='352px'
-					allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy">
+			<div style={{ margin: '5rem', height: '100%' }}>
+				<p style={{ fontSize: '3rem' }}>Credits</p>
+				<ExternalLink style={{ fontWeight: '600', fontSize: '2rem' }} url={currentTrack.trackUrl} displayText={currentTrack.trackName} />
+				<VerticalSpacer size='1rem' />
 
-				</iframe>
+				<CreditsSection sectionTitle='Album:'>
+					<ExternalLink url={(currentTrack.sourcePlaybackState.item as Track).album.external_urls.spotify} displayText={currentTrack.albumName} />
+				</CreditsSection>
+				
+				<CreditsSection sectionTitle='Artists:'>
+					{
+						(currentTrack.sourcePlaybackState?.item as Track).artists
+							.map((artist: SimplifiedArtist, index: number, array: SimplifiedArtist[]) => <Fragment key={index}>
+								<ExternalLink
+									url={artist.external_urls.spotify}
+									displayText={artist.name} />
+								{index !== array.length - 1 ? <span key={`t${index}`}>, &nbsp;</span> : <></>}
+							</Fragment>)
+						?? ''
+					}
+				</CreditsSection>
 
 			</div>
 		</div>
 	</>
 }
-function isTouchDevice() {
-	return window.ontouchstart !== undefined
-  }
-
 
 export const Home = () => {
-	console.log(isTouchDevice())
 	const [spotify] = useState(() => Spotify.getInstance());
 
 	const [currentTrack, setCurrentTrack] = useState(defaults.defaultNoTrack);
@@ -87,15 +95,14 @@ export const Home = () => {
 	// Show mouse when moving, and hide mouse after 5 seconds of not moving it.
 	const [mouseTimeout, setMouseTimeout] = useState(undefined as NodeJS.Timeout);
 	const onMouseMove = useCallback(() => {
-		const root: HTMLElement = document.querySelector(':root') as HTMLElement;
 		if (mouseTimeout) {
 			clearTimeout(mouseTimeout);
 		}
-		root.style.cursor = 'default';
+		document.body.style.cursor = 'default';
 
 		setMouseTimeout(setTimeout(() => {
 			setMouseTimeout(undefined);
-			root.style.cursor = 'none';
+			document.body.style.cursor = 'none';
 		}, HIDE_CONTROLS_AFTER_MS));
 	}, [mouseTimeout]);
 

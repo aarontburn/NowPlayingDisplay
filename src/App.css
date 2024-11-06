@@ -1,5 +1,8 @@
 :root {
     --svg-size: 2rem;
+}
+
+body {
     cursor: none;
 }
 
