@@ -1,7 +1,7 @@
 import './App.css';
 import { Route, Routes } from "react-router-dom";
 import { CurrentTrack, defaults, Spotify } from './Spotify';
-import { ReactNode, useCallback, useEffect, useState, Fragment } from 'react';
+import { ReactNode, useCallback, useEffect, useState, Fragment, MouseEvent } from 'react';
 import infoSVG from './assets/info.svg';
 import { SimplifiedArtist, Track } from '@spotify/web-api-ts-sdk';
 
@@ -79,7 +79,7 @@ export const Home = () => {
 	const [currentTrack, setCurrentTrack] = useState(defaults.defaultNoTrack);
 	const getTrack = useCallback(async () => spotify.getCurrentTrack().then((track) => {
 		if (track.trackLength !== -1) {
-			setCurrentTrack(track)
+			setCurrentTrack(track);
 		}
 	}), [spotify]);
 
@@ -94,7 +94,7 @@ export const Home = () => {
 
 	// Show mouse when moving, and hide mouse after 5 seconds of not moving it.
 	const [mouseTimeout, setMouseTimeout] = useState(undefined as NodeJS.Timeout);
-	const onMouseMove = useCallback((event) => {
+	const onMouseMove = useCallback((event: MouseEvent) => {
 		if (event.movementX === 0 && event.movementY === 0) {
 			return;
 		}
@@ -113,7 +113,7 @@ export const Home = () => {
 	// Show control panel when mouse is clicked, and hide after 5 seconds
 	const [showControls, setShowControls] = useState(false);
 	const [controlTimeout, setControlTimeout] = useState(undefined as NodeJS.Timeout);
-	const onMouseDown = useCallback((event) => {
+	const onMouseDown = useCallback(() => {
 		if (controlTimeout) {
 			clearTimeout(controlTimeout);
 		}

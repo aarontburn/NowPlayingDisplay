@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "now-playing-display",
   "version": "0.1.0",
   "private": true,
   "dependencies": {

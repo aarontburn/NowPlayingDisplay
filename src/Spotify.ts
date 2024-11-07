@@ -70,7 +70,6 @@ export class Spotify {
         return this.instance ?? (this.instance = new Spotify());
     }
 
-
     /**
      *  Private constructor. Should not be called anywhere outside of the lazy singleton accessor.
      *  @see getInstance
@@ -113,8 +112,6 @@ export class Spotify {
             this.sdk = SpotifyApi.withAccessToken(Spotify.CLIENT_ID, token);
 
             log("Successfully authenticated with Spotify");
-            log(`Token refresh occurs at ${new Date(token.expires).toLocaleTimeString()}, or in ${this.calculateRefreshTime(token) / 1000} seconds`);
-            log(JSON.stringify(token, undefined, 4))
 
         } catch (err) {
             console.log(err);
@@ -150,8 +147,7 @@ export class Spotify {
         //  Wait until the authentication finished.
         //  If this function is called during the built-in token refresh process,
         //      I THINK this halts this Promise until the process finishes.
-        const token = await this.sdk.getAccessToken();
-        // console.log(JSON.stringify(token, undefined, 4))
+        await this.sdk.getAccessToken();
 
         let currentTrack: PlaybackState = undefined;
         try {
@@ -165,14 +161,11 @@ export class Spotify {
             return defaults.defaultNoTrack;
         }
 
-        // console.log(currentTrack.item.uri)
 
         // If the currently playing item is an episode, return the default object.
         if (currentTrack.currently_playing_type === 'episode') {
-            // console.log(currentTrack)
             return defaults.defaultNoTrack;
         }
-
 
         const song: Track = currentTrack.item as Track;
 
@@ -189,20 +182,5 @@ export class Spotify {
             sourcePlaybackState: currentTrack
         }
     }
-
-
-
-    private calculateRefreshTime(token: AccessToken): number {
-        const currentMS: number = new Date().getTime();
-        const tokenExpires: number | undefined = token.expires;
-
-        if (tokenExpires === undefined) {
-            return -1;
-        }
-
-        return tokenExpires - currentMS;
-    }
-
-
 
 }

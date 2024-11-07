@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Now Playing Display",
+  "name": "Now Playing Display",
   "icons": [
     {
       "src": "favicon.ico",
