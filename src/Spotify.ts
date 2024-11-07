@@ -118,7 +118,7 @@ export class Spotify {
 
             //  For some reason, an error after authentication and goes away after refreshing.
             //  However, refreshing right away creates a refreshing loop, so we refresh
-            //      after 0.5 seconds. This could potentially be tweaked to be shorter. 
+            //      after 0.5 seconds. This could be tweaked to be shorter. 
             if ((err as Error).message.includes(PAGE_REFRESH_ERR)) {
                 setTimeout(() => window.location.reload(), 500);
             }
@@ -146,7 +146,7 @@ export class Spotify {
 
         //  Wait until the authentication finished.
         //  If this function is called during the built-in token refresh process,
-        //      I THINK this halts this Promise until the process finishes.
+        //      I THINK this halts this function until the process finishes.
         await this.sdk.getAccessToken();
 
         let currentTrack: PlaybackState = undefined;

@@ -85,6 +85,7 @@ export const Home = () => {
 
 	const [showCredits, setShowCredits] = useState(false);
 
+	// Refresh the currently playing song after an interval.
 	useEffect(() => {
 		getTrack();
 		const interval = setInterval(getTrack, POLL_INTERVAL_MS);
