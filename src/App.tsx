@@ -150,6 +150,8 @@ export const Home = () => {
 			/>
 		</>}
 
+
+
 		{/* Render the details of the currently playing song */}
 		<div id='details-container'>
 			<div id='small-album-art'>
